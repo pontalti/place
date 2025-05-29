@@ -1,0 +1,176 @@
+{
+	"info": {
+		"_postman_id": "a317e477-38d1-49c8-9f54-083ddaf08a9c",
+		"name": "Place",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "1700952"
+	},
+	"item": [
+		{
+			"name": "Create place",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[\r\n  {\r\n    \"label\": \"Stadio Giuseppe Meazza\",\r\n    \"location\": \"Piazzale Angelo Moratti, 20151 Milano MI, Itália\",\r\n    \"days\": [\r\n      {\r\n        \"dayOfWeek\": \"wednesday\",\r\n        \"startTime\": \"11:30\",\r\n        \"endTime\": \"15:00\",\r\n        \"type\": \"OPEN\"\r\n      },\r\n      {\r\n        \"dayOfWeek\": \"wednesday\",\r\n        \"startTime\": \"18:30\",\r\n        \"endTime\": \"00:00\",\r\n        \"type\": \"OPEN\"\r\n      },\r\n      {\r\n        \"dayOfWeek\": \"thursday\",\r\n        \"startTime\": \"11:30\",\r\n        \"endTime\": \"15:00\",\r\n        \"type\": \"OPEN\"\r\n      },\r\n      {\r\n        \"dayOfWeek\": \"thursday\",\r\n        \"startTime\": \"18:30\",\r\n        \"endTime\": \"00:00\",\r\n        \"type\": \"OPEN\"\r\n      },\r\n      {\r\n        \"dayOfWeek\": \"saturday\",\r\n        \"startTime\": \"18:00\",\r\n        \"endTime\": \"00:00\",\r\n        \"type\": \"OPEN\"\r\n      },\r\n      {\r\n        \"dayOfWeek\": \"sunday\",\r\n        \"startTime\": \"15:00\",\r\n        \"endTime\": \"16:00\",\r\n        \"type\": \"OPEN\"\r\n      }\r\n    ]\r\n  }\r\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/place",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"place"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create place",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"label\": \"Stadio Giuseppe Meazza -> Patch\",\r\n  \"days\": [\r\n    { \"dayOfWeek\": \"FRIDAY\", \"startTime\": \"18:00\", \"endTime\": \"23:00\", \"type\": \"OPEN\" },\r\n    { \"id\": 26, \"dayOfWeek\": \"SUNDAY\", \"startTime\": \"17:00\", \"endTime\": \"18:00\", \"type\": \"OPEN\" }\r\n  ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/place/3",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"place",
+						"3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update palce",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": 3,\r\n  \"label\": \"Stadio Giuseppe Meazza - test\",\r\n  \"location\": \"Piazzale Angelo Moratti, 20151 Milano MI, Itália - test\",\r\n  \"days\": [\r\n    {\r\n      \"dayOfWeek\": \"wednesday\",\r\n      \"startTime\": \"11:30\",\r\n      \"endTime\": \"15:00\",\r\n      \"type\": \"OPEN\"\r\n    },\r\n    {\r\n      \"dayOfWeek\": \"wednesday\",\r\n      \"startTime\": \"18:30\",\r\n      \"endTime\": \"00:00\",\r\n      \"type\": \"OPEN\"\r\n    },\r\n    {\r\n      \"dayOfWeek\": \"thursday\",\r\n      \"startTime\": \"11:30\",\r\n      \"endTime\": \"15:00\",\r\n      \"type\": \"OPEN\"\r\n    },\r\n    {\r\n      \"dayOfWeek\": \"thursday\",\r\n      \"startTime\": \"18:30\",\r\n      \"endTime\": \"00:00\",\r\n      \"type\": \"OPEN\"\r\n    },\r\n    {\r\n      \"dayOfWeek\": \"saturday\",\r\n      \"startTime\": \"18:00\",\r\n      \"endTime\": \"00:00\",\r\n      \"type\": \"OPEN\"\r\n    },\r\n    {\r\n      \"dayOfWeek\": \"sunday\",\r\n      \"startTime\": \"15:00\",\r\n      \"endTime\": \"16:00\",\r\n      \"type\": \"OPEN\"\r\n    }\r\n  ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/place",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"place"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "list all",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/place",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"place"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get by id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/place/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"place",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get by id grouped",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/place/1/opening-hours/grouped",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"place",
+						"1",
+						"opening-hours",
+						"grouped"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete place",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/place/3",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"place",
+						"3"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
