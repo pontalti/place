@@ -13,10 +13,10 @@ build/
 !**/src/test/**/build/
 #*.gradle
 #*.gradle.kts
-gradle-app.setting
-gradlew
-gradlew.bat
-gradle/
+#gradle-app.setting
+#gradlew
+#gradlew.bat
+#gradle/
 
 # Spring Tool Suite (STS)
 .apt_generated
