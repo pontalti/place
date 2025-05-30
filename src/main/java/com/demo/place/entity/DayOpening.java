@@ -5,11 +5,14 @@ import com.demo.place.entity.Serializer.DayOfWeekSerializer;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.DayOfWeek;
 
@@ -19,6 +22,8 @@ import java.time.DayOfWeek;
 @NoArgsConstructor
 @Entity
 @Table
+@DynamicInsert
+@DynamicUpdate
 public class DayOpening {
 
     @Id
