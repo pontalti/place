@@ -7,9 +7,9 @@ Place - code challenge.
 ## 🔧 Development Environment
 
 - **OS:** Fedora 42
-- **JDK:** 21
-- **Build Tool:** Gradle 8.14
-- **Version Control:** Git 2.49.0
+- **JDK:** 25
+- **Build Tool:** Gradle 9.1.0
+- **Version Control:** Git 2.51.0
 - **API Testing Tool:** Postman and curl
 
 ---
@@ -29,10 +29,10 @@ Or visit the repo: [https://github.com/pontalti/place](https://github.com/pontal
 
 Make sure the following are installed:
 
-- [JDK 21](https://adoptium.net/)
-- [Gradle 8.14](https://gradle.org/)
+- [JDK 25](https://openjdk.org/projects/jdk/25/)
+- [Gradle 9.1.0](https://gradle.org/)
 - Your favorite IDE (VSCode, IntelliJ, Eclipse, etc.)
-- **(Optional)** [Podman](https://podman.io/) and [podman-compose](https://github.com/containers/podman-compose) – only
+- **(Optional)** [Docker Desktop](https://www.docker.com/products/docker-desktop/) – only
   required if you want to run the application in containers.
 
 ---
@@ -63,24 +63,24 @@ From the project root folder:
 java -jar build/libs/place.jar
 ```
 
-### Option 3 – via Container (Podman)
+### Option 3 – via Container (Docker)
 
 Build the container image(s):
 
 ```bash
-podman-compose build
+docker-compose build
 ```
 
 Start the containers in detached mode:
 
 ```bash
-podman-compose up -d
+docker-compose up -d
 ```
 
 Follow the application logs:
 
 ```bash
-podman logs -f place
+docker logs -f place
 ```
 
 ---

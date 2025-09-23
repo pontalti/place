@@ -7,7 +7,7 @@ plugins {
 group = "com.demo.place"
 version = "0.0.1-SNAPSHOT"
 description = "Place Coding Challenge"
-java.sourceCompatibility = JavaVersion.VERSION_21
+java.sourceCompatibility = JavaVersion.VERSION_25
 
 repositories {
     mavenCentral()
