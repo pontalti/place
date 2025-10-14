@@ -7,7 +7,6 @@ plugins {
 group = "com.demo.place"
 version = "0.0.1-SNAPSHOT"
 description = "Place Coding Challenge"
-java.sourceCompatibility = JavaVersion.VERSION_25
 
 repositories {
     mavenCentral()
@@ -15,6 +14,12 @@ repositories {
 
 extra["springdocOpenapiVersion"] = "2.8.8"
 extra["mapstructVersion"] = "1.6.3"
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    }
+}
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")

@@ -1,26 +1,31 @@
 package com.demo.place.service.impl;
 
+import java.time.DayOfWeek;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
 import com.demo.place.entity.Place;
 import com.demo.place.mapper.PlaceMapper;
 import com.demo.place.records.PlacePatchRecord;
 import com.demo.place.records.PlaceRecord;
 import com.demo.place.repository.PlaceRepository;
 import com.demo.place.service.PlaceService;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.time.DayOfWeek;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Scope(scopeName = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class PlaceServiceImpl implements PlaceService {
 
     private final PlaceRepository repository;
