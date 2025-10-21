@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.demo.place.aop.Log;
 import com.demo.place.entity.Place;
 import com.demo.place.mapper.PlaceMapper;
 import com.demo.place.records.PlacePatchRecord;
@@ -31,6 +32,7 @@ public class PlaceServiceImpl implements PlaceService {
     private final PlaceRepository repository;
     private final PlaceMapper mapper;
 
+    @Log
     @Override
     public List<PlaceRecord> savePlace(List<PlaceRecord> places) {
         var entities = places.stream()
@@ -42,6 +44,7 @@ public class PlaceServiceImpl implements PlaceService {
                 .collect(Collectors.toList());
     }
 
+    @Log
     @Override
     public List<PlaceRecord> listAll() {
         return this.repository.findAll().stream()
@@ -49,6 +52,7 @@ public class PlaceServiceImpl implements PlaceService {
                 .collect(Collectors.toList());
     }
 
+    @Log
     @Override
     public PlaceRecord findById(Long id) {
         var place = this.repository.findById(id)
@@ -57,7 +61,7 @@ public class PlaceServiceImpl implements PlaceService {
         return this.mapper.toRecord(place);
     }
 
-
+    @Log
     @Override
     public void deleteById(Long id) {
         if (!this.repository.existsById(id)) {
@@ -67,6 +71,7 @@ public class PlaceServiceImpl implements PlaceService {
         this.repository.deleteById(id);
     }
 
+    @Log
     @Override
     @Transactional
     public PlaceRecord updatePlace(PlaceRecord updatedPlace) {
@@ -95,6 +100,7 @@ public class PlaceServiceImpl implements PlaceService {
         return place;
     }
 
+    @Log
     @Override
     @Transactional
     public PlaceRecord patchPlace(Long id, PlacePatchRecord patch) {

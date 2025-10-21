@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.demo.place.aop.Log;
 import com.demo.place.records.DayIntervalRecord;
 import com.demo.place.records.GroupedOpeningDayRecord;
 import com.demo.place.records.GroupedPlaceRecord;
@@ -32,6 +33,7 @@ public class GroupPlaceServiceImpl implements GroupPlaceService {
 	private final List<DayOfWeek> dayOrder;
 	private final PlaceRepository repository;
 
+	@Log
 	@Override
 	public GroupedPlaceRecord getGroupedOpeningHoursByPlaceId(Long id) {
 		var place = this.repository.findById(id)
