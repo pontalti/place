@@ -5,6 +5,10 @@ spring:
   application:
     name: place
 
+  threads:
+    virtual:
+      enabled: true
+
   devtools:
     remote:
       secret: teste
