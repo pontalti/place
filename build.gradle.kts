@@ -35,6 +35,8 @@ dependencies {
     implementation("org.mapstruct:mapstruct:${property("mapstructVersion")}")
 
     runtimeOnly("com.h2database:h2")
+    
+    implementation("org.flywaydb:flyway-core")
 
     // Lombok (optional)
     compileOnly("org.projectlombok:lombok")
