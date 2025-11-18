@@ -1,83 +1,91 @@
 plugins {
     java
-    id("org.springframework.boot") version "3.4.5"
-    id("io.spring.dependency-management") version "1.1.4"
+    id("io.quarkus") version "3.29.3"
 
-    // IDE integrations
+    // Integrações IDE
     id("idea")
     id("eclipse")
 }
 
 group = "com.demo.place"
 version = "0.0.1-SNAPSHOT"
-description = "Place Coding Challenge"
+description = "Place Coding Challenge (Quarkus)"
 
 repositories {
     mavenCentral()
+    mavenLocal() // opcional, mas recomendado pelo Quarkus
 }
 
-extra["springdocOpenapiVersion"] = "2.8.8"
 extra["mapstructVersion"] = "1.6.3"
+extra["lombokVersion"] = "1.18.34"
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(25))
+        languageVersion.set(JavaLanguageVersion.of(21))
     }
 }
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-aop")
+    // --- Alinha todas as versões de extensões Quarkus ---
+    implementation(enforcedPlatform("io.quarkus.platform:quarkus-bom:3.29.3"))
 
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:${property("springdocOpenapiVersion")}")
+    // --- Núcleo Quarkus / Web / JPA ---
+    implementation("io.quarkus:quarkus-config-yaml")
+    implementation("io.quarkus:quarkus-arc")               // CDI
+    implementation("io.quarkus:quarkus-rest")              // Novo REST (substitui quarkus-resteasy-reactive)
+    implementation("io.quarkus:quarkus-rest-jackson")      // JSON via Jackson
+
+    implementation("io.quarkus:quarkus-hibernate-orm")
+    implementation("io.quarkus:quarkus-hibernate-validator")
+    implementation("io.quarkus:quarkus-hibernate-orm-panache") // opcional
+    implementation("io.quarkus:quarkus-jdbc-h2")
+    implementation("io.quarkus:quarkus-flyway")
+   
+	implementation("io.quarkus:quarkus-vertx")
+	implementation("io.quarkus:quarkus-undertow")
+   
+    implementation("io.quarkus:quarkus-container-image-docker")
+
+    // --- Observabilidade ---
+    implementation("io.quarkus:quarkus-smallrye-health")
+    implementation("io.quarkus:quarkus-micrometer-registry-prometheus")
+
+    // --- OpenAPI / Swagger ---
+    implementation("io.quarkus:quarkus-smallrye-openapi")
+
+    // --- MapStruct ---
     implementation("org.mapstruct:mapstruct:${property("mapstructVersion")}")
-
-    runtimeOnly("com.h2database:h2")
-
-    // Lombok (optional)
-    compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok")
-    testCompileOnly("org.projectlombok:lombok")
-    testAnnotationProcessor("org.projectlombok:lombok")
-
-    // MapStruct processors
     annotationProcessor("org.mapstruct:mapstruct-processor:${property("mapstructVersion")}")
     testAnnotationProcessor("org.mapstruct:mapstruct-processor:${property("mapstructVersion")}")
 
-    developmentOnly("org.springframework.boot:spring-boot-devtools")
+    // --- Lombok (opcional) ---
+    compileOnly("org.projectlombok:lombok:${property("lombokVersion")}")
+    annotationProcessor("org.projectlombok:lombok:${property("lombokVersion")}")
+    testCompileOnly("org.projectlombok:lombok:${property("lombokVersion")}")
+    testAnnotationProcessor("org.projectlombok:lombok:${property("lombokVersion")}")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    // --- Testes ---
+    testImplementation("io.quarkus:quarkus-junit5")
+    testImplementation("io.rest-assured:rest-assured")
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    // recomendado pelo Quarkus para logging correto nos testes
+    systemProperty("java.util.logging.manager", "org.jboss.logmanager.LogManager")
 }
 
-// Produce plain artifact names
+// Nome do jar (não é obrigatório, mas se quiser manter)
 tasks.jar {
-    archiveBaseName.set("place")
-    archiveVersion.set("")
-}
-tasks.bootJar {
-    archiveBaseName.set("place")
+    archiveBaseName.set("place2")
     archiveVersion.set("")
 }
 
-// Force MapStruct to generate Spring components (@Mapper(componentModel = "spring"))
+// MapStruct usando CDI (equivalente ao "spring" em Spring Boot)
 tasks.withType<JavaCompile>().configureEach {
-    options.compilerArgs.add("-Amapstruct.defaultComponentModel=spring")
+    options.compilerArgs.add("-Amapstruct.defaultComponentModel=cdi")
 }
 
-/**
- * Make generated annotation-processor sources visible to IDEs.
- * Gradle puts them under:
- *   build/generated/sources/annotationProcessor/java/{main|test}
- * We mark them in IDEA and add them to Eclipse classpath.
- */
 idea {
     module {
         generatedSourceDirs.add(file("build/generated/sources/annotationProcessor/java/main"))
@@ -89,7 +97,6 @@ idea {
 
 eclipse {
     classpath {
-        // Add generated folders to Eclipse classpath (no private flags used)
         file.whenMerged {
             val cp = this as org.gradle.plugins.ide.eclipse.model.Classpath
             cp.entries.add(

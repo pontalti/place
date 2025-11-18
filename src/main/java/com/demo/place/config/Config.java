@@ -1,16 +1,23 @@
 package com.demo.place.config;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
 import java.time.DayOfWeek;
 import java.util.List;
 
-@Configuration
+import com.demo.place.annotation.DayOrder;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
+
+@ApplicationScoped
 public class Config {
 
-    @Bean
-    public List<DayOfWeek> dayOrder() {
+	public Config() {
+		super();
+	}
+	
+	@DayOrder
+    @Produces
+	public List<DayOfWeek> dayOrder() {
         return List.of(DayOfWeek.MONDAY,
                 DayOfWeek.TUESDAY,
                 DayOfWeek.WEDNESDAY,
@@ -19,5 +26,5 @@ public class Config {
                 DayOfWeek.SATURDAY,
                 DayOfWeek.SUNDAY);
     }
-
+	
 }

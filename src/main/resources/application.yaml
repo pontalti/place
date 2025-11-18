@@ -1,61 +1,28 @@
-server:
-  port: 8080
-
-spring:
-  application:
-    name: place
-
-  threads:
-    virtual:
+quarkus:
+  package:
+    jar:
       enabled: true
-
-  devtools:
-    remote:
-      secret: teste
-    add-properties: true
-
-  jackson:
-    serialization:
-      indent-output: true
+      type: fast-jar
+  container-image:
+    build: false           # manda construir a imagem no build
+    push: false            # não fazer push pro registry (por enquanto)
+    group: com.demo.place  # parte antes da barra (repo/namespace)
+    name: place2           # nome da imagem
+    tag: "0.0.1-SNAPSHOT"  # tag (opcional; default é a versão do projeto)
 
   datasource:
-    url: jdbc:h2:mem:pizza;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    db-kind: h2
     username: sa
-    password:
-    driver-class-name: org.h2.Driver
+    password: 
+    jdbc:
+      url: jdbc:h2:mem:pizza;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+  hibernate-orm:
+    log:
+      sql: true
+    database:
+      generation: validate
+    physical-naming-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
 
-  jpa:
-    show-sql: true
-    hibernate:
-      ddl-auto: validate
-    properties:
-      hibernate:
-        format_sql: true
-        naming:
-          physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
-    database-platform: org.hibernate.dialect.H2Dialect
-
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-
-  sql:
-    init:
-      mode: always
-      platform: h2
-
-logging:
-  level:
-    root: INFO
-    com.seuprojeto: DEBUG
-  file:
-    name: logs/app.log
-  pattern:
-    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"
-
-
-springdoc:
-  swagger-ui:
-    path: /swagger-ui/index.html
+  flyway:
+    migrate-at-start: true
+    baseline-on-migrate: false
