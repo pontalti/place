@@ -16,7 +16,7 @@ repositories {
     mavenCentral()
 }
 
-extra["springdocOpenapiVersion"] = "2.8.8"
+extra["springdocOpenapiVersion"] = "2.8.14"
 extra["mapstructVersion"] = "1.6.3"
 
 java {
