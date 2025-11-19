@@ -83,9 +83,18 @@ public class PlaceResource {
 		List<PlaceRecord> places = placeService.listAll();
 		return Response.ok(places).build();
 	}
-
+	
 	@GET
 	@Path("/place/{id}")
+	@Operation(summary = "Fetch a Place by ID", description = "Returns a place details")
+    public Response findById(@PathParam("id") @Parameter(name = "id", description = "Place ID", example = "1", required = true) Long id
+    ) {
+        var place = this.placeService.findById(id);
+        return Response.ok(place).build();
+    }
+
+	@GET
+	@Path("/place/{id}/opening-hours/grouped")
 	@Operation(summary = "Fetch a Place by ID", description = "Returns a place details and its grouped opening hours")
 	@APIResponses({
 			@APIResponse(responseCode = "200", description = "Place found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GroupedPlaceRecord.class))),

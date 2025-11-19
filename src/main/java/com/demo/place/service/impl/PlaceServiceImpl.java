@@ -112,10 +112,7 @@ public class PlaceServiceImpl implements PlaceService {
         return mapper.toRecord(existingPlace);
     }
 
-    /**
-     * Constrói a entidade Place a partir do record e
-     * garante o vínculo bidirecional com DayOpening.
-     */
+
     protected Place buildEntity(PlaceRecord record) {
         var place = mapper.toEntity(record);
         place.getDays().forEach(d -> d.setPlace(place));

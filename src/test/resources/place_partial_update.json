@@ -1,0 +1,11 @@
+{
+  "label": "Stadio Giuseppe Meazza -> Patch",
+  "days": [
+    {
+      "dayOfWeek": "FRIDAY",
+      "startTime": "18:00",
+      "endTime": "23:00",
+      "type": "OPEN"
+    }
+  ]
+}
