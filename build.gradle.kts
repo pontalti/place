@@ -13,21 +13,25 @@ description = "Place Coding Challenge (Quarkus)"
 
 repositories {
     mavenCentral()
-    mavenLocal() // opcional, mas recomendado pelo Quarkus
+    mavenLocal()
 }
-
-extra["mapstructVersion"] = "1.6.3"
-extra["lombokVersion"] = "1.18.34"
 
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(21))
     }
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 dependencies {
     // --- Alinha todas as versões de extensões Quarkus ---
-    implementation(enforcedPlatform("io.quarkus.platform:quarkus-bom:3.29.3"))
+        implementation(enforcedPlatform(
+        "${property("quarkusPlatformGroupId")}:${property("quarkusPlatformArtifactId")}:${property("quarkusPlatformVersion")}"
+    ))
+    testImplementation(enforcedPlatform(
+        "${property("quarkusPlatformGroupId")}:${property("quarkusPlatformArtifactId")}:${property("quarkusPlatformVersion")}"
+    ))
 
     // --- Núcleo Quarkus / Web / JPA ---
     implementation("io.quarkus:quarkus-config-yaml")
@@ -70,21 +74,24 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.26.0")
 }
 
-tasks.withType<Test> {
+tasks.withType<Test>().configureEach {
     useJUnitPlatform()
-    // recomendado pelo Quarkus para logging correto nos testes
     systemProperty("java.util.logging.manager", "org.jboss.logmanager.LogManager")
+    testLogging {
+        events("PASSED", "FAILED", "SKIPPED")
+        showStandardStreams = true
+    }
 }
 
-// Nome do jar (não é obrigatório, mas se quiser manter)
 tasks.jar {
-    archiveBaseName.set("place2")
+    archiveBaseName.set("place")
     archiveVersion.set("")
 }
 
-// MapStruct usando CDI (equivalente ao "spring" em Spring Boot)
 tasks.withType<JavaCompile>().configureEach {
+    options.encoding = "UTF-8"
     options.compilerArgs.add("-Amapstruct.defaultComponentModel=cdi")
+    options.compilerArgs.add("-parameters")
 }
 
 idea {
