@@ -6,11 +6,11 @@ Place - code challenge.
 
 ## 🔧 Development Environment
 
-- **OS:** Fedora 42
-- **JDK:** 25
-- **Build Tool:** Gradle 9.1.0
-- **Version Control:** Git 2.51.0
-- **API Testing Tool:** Postman and curl
+- **OS:** Fedora 42  
+- **JDK:** 21  
+- **Build Tool:** Gradle 9.1.0  
+- **Version Control:** Git 2.51.1  
+- **API Testing Tool:** Postman and curl  
 
 ---
 
@@ -23,27 +23,28 @@ git clone git@github.com:pontalti/place.git
 cd place
 ```
 
-Or visit the repo: [https://github.com/pontalti/place](https://github.com/pontalti/place)
+Or visit the repo: https://github.com/pontalti/place
 
 ### 2. Requirements
 
 Make sure the following are installed:
 
-- [JDK 25](https://openjdk.org/projects/jdk/25/)
-- [Gradle 9.1.0](https://gradle.org/)
-- Your favorite IDE (VSCode, IntelliJ, Eclipse, etc.)
-- **(Optional)** [Docker Desktop](https://www.docker.com/products/docker-desktop/) – only
-  required if you want to run the application in containers.
+- JDK 21  
+- Gradle 9.1.0  
+- Your favorite IDE (VSCode, IntelliJ, Eclipse, etc.)  
+- (Optional) Docker Desktop – only required if you want to run the application in containers.
 
 ---
 
-## 🛠 Build the Project
+## 🛠 Build the Project (Quarkus)
 
-Navigate to the project root folder and run:
+From the project root folder:
 
 ```bash
 ./gradlew clean build --refresh-dependencies
 ```
+
+This will build the Quarkus application (fast-jar layout) under `build/quarkus-app`.
 
 ---
 
@@ -51,16 +52,26 @@ Navigate to the project root folder and run:
 
 From the project root folder:
 
-### Option 1 – via Gradle
+### Option 1 – Quarkus dev mode (recommended)
+
+Hot reload, detailed logs, etc.:
 
 ```bash
-./gradlew bootRun
+./gradlew quarkusDev
 ```
 
-### Option 2 – via Jar
+The app will start on:
+
+```text
+http://localhost:8081
+```
+
+### Option 2 – via Jar (runner)
+
+After `./gradlew build`, run:
 
 ```bash
-java -jar build/libs/place.jar
+java -jar build/quarkus-app/quarkus-run.jar
 ```
 
 ### Option 3 – via Container (Docker)
@@ -87,59 +98,63 @@ docker logs -f place
 
 ## 🌐 API Overview
 
-The application loads initial data into an **H2 in-memory database** and exposes the following REST endpoints:
+The application loads initial data into an H2 in-memory database and exposes the following REST endpoints (Quarkus / RESTEasy Reactive).
+
+> ℹ️ A aplicação está configurada para rodar na porta **8081**.
 
 ### 🏠 Home Endpoint
 
 ```bash
-curl http://localhost:8080/
+curl http://localhost:8081/
 ```
 
 ### 📍 Places
 
+Base path dos recursos: `/place`.
+
 #### Get all places
 
 ```bash
-curl http://localhost:8080/places
+curl http://localhost:8081/place
 ```
 
 #### Get place by ID
 
 ```bash
-curl http://localhost:8080/places/1
+curl http://localhost:8081/place/1
 ```
 
 #### Get grouped opening hours by place ID
 
 ```bash
-curl http://localhost:8080/places/1/opening-hours/grouped
+curl http://localhost:8081/place/1/opening-hours/grouped
 ```
 
 #### Create one or multiple places
 
+O endpoint aceita um array de objetos Place.
+
 ```bash
-curl -X POST http://localhost:8080/places -H "Content-Type: application/json" -d @/path/to/postman/places.json
+curl -X POST http://localhost:8081/place   -H "Content-Type: application/json"   -d @/path/to/postman/place.json
 ```
 
 #### Delete a place by ID
 
 ```bash
-curl -X DELETE http://localhost:8080/places/{id}
+curl -X DELETE http://localhost:8081/place/{id}
 ```
 
-#### Update a place
+#### Update a place (full update)
 
 ```bash
-curl -X PUT http://localhost:8080/places/ -H "Content-Type: application/json" -d @/path/to/postman/place_update.json
+curl -X PUT http://localhost:8081/place/{id}   -H "Content-Type: application/json"   -d @/path/to/postman/place_update.json
 ```
 
-#### Update a partial place
+#### Partial update (PATCH)
 
 ```bash
-curl -X PATCH http://localhost:8080/places/{id} -H "Content-Type: application/json" -d @/path/to/postman/place_partial_update.json
+curl -X PATCH http://localhost:8081/place/{id}   -H "Content-Type: application/json"   -d @/path/to/postman/place_partial_update.json
 ```
-
-> 💡 Replace `/path/to/postman/places.json` with the full path to your JSON file.
 
 ---
 
@@ -155,17 +170,25 @@ You can import a predefined collection to test all endpoints easily:
 
 ## 🧬 OpenAPI Documentation (Swagger)
 
-Access the API documentation via Swagger UI:
+With Quarkus + SmallRye OpenAPI + Swagger UI, you can access:
 
-```text
-http://localhost:8080/swagger-ui/swagger-ui/index.html
-```
+- Swagger UI:
+
+  ```text
+  http://localhost:8081/q/swagger-ui/
+  ```
+
+- OpenAPI document (JSON/YAML):
+
+  ```text
+  http://localhost:8081/q/openapi
+  ```
 
 ---
 
 ## 🧰 Additional Tools
 
-### Install `curl` (if not already available)
+### Install curl (if not already available)
 
 #### Windows
 
@@ -184,3 +207,15 @@ sudo apt-get install curl
 ```bash
 sudo dnf install curl
 ```
+
+---
+
+## ✅ Running Tests
+
+To run the Quarkus tests (including the REST tests with RestAssured):
+
+```bash
+./gradlew test
+```
+
+---
