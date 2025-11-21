@@ -68,9 +68,7 @@ public class PlaceResource {
 							content = @Content(mediaType = MediaType.APPLICATION_JSON, 
 							schema = @Schema(implementation = PlaceRecord[].class))) 
 			@Valid @Size(min = 1, message = "Provide at least one location.") List<PlaceRecord> places) {
-
 		List<PlaceRecord> savedPlaces = placeService.savePlace(places);
-
 		return Response.status(Response.Status.CREATED).entity(savedPlaces).build();
 	}
 
@@ -87,8 +85,7 @@ public class PlaceResource {
 	@GET
 	@Path("/place/{id}")
 	@Operation(summary = "Fetch a Place by ID", description = "Returns a place details")
-    public Response findById(@PathParam("id") @Parameter(name = "id", description = "Place ID", example = "1", required = true) Long id
-    ) {
+    public Response findById(@PathParam("id") @Parameter(name = "id", description = "Place ID", example = "1", required = true) Long id) {
         var place = this.placeService.findById(id);
         return Response.ok(place).build();
     }
@@ -99,14 +96,8 @@ public class PlaceResource {
 	@APIResponses({
 			@APIResponse(responseCode = "200", description = "Place found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GroupedPlaceRecord.class))),
 			@APIResponse(responseCode = "404", description = "Place not found") })
-	public Response fetchPlace(
-			@PathParam("id") @Parameter(name = "id", description = "Place ID", example = "1", required = true) Long placeId) {
-
+	public Response fetchPlace(@PathParam("id") @Parameter(name = "id", description = "Place ID", example = "1", required = true) Long placeId) {
 		GroupedPlaceRecord placeResponse = groupPlaceService.getGroupedOpeningHoursByPlaceId(placeId);
-
-		if (placeResponse == null) {
-			return Response.status(Response.Status.NOT_FOUND).build();
-		}
 		return Response.ok(placeResponse).build();
 	}
 
@@ -126,16 +117,21 @@ public class PlaceResource {
 	@PATCH
 	@Path("/place")
 	@Operation(summary = "Partially update a Place resource", description = """
-			Accepts only the attributes that need to be updated.<br>
-			• Any field that is omitted remains unchanged.<br>
-			• The days list (opening hours) may be sent in full or partially;
-			the supplied days overwrite the existing entries with the same index/day.
+                Updates only the attributes provided in the PATCH request body.
+                
+                **Validation Rules:**
+                1. The `id` field is **mandatory** (required) in the request body.
+                2. At least **one** update field (`label`, `location`, or `days`) must be supplied.
+                
+                **Update Behavior:**
+                • Any field (excluding `id`) that is **omitted** from the JSON remains unchanged in the resource.
+                • The `days` list (opening hours) is typically treated as a *sub-resource*; the supplied list will be processed by the service to merge or overwrite existing entries.
 			""")
 	@RequestBody(required = true, description = "Partial Place payload", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PlacePatchRecord.class)))
 	@APIResponses({
 			@APIResponse(responseCode = "200", description = "Place partially updated successfully", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PlaceRecord.class))),
 			@APIResponse(responseCode = "404", description = "Place not found"),
-			@APIResponse(responseCode = "400", description = "Invalid or malformed request") })
+			@APIResponse(responseCode = "400", description = "Invalid request (validation failure or malformed payload)") })
 	public Response patchPlace(@Valid PlacePatchRecord patchRecord) {
 		PlaceRecord updated = placeService.patchPlace(patchRecord);
 		return Response.ok(updated).build();
