@@ -12,8 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @Provider
-public class ConstraintViolationExceptionMapper
-        implements ExceptionMapper<ConstraintViolationException> {
+public class ConstraintViolationExceptionMapper implements ExceptionMapper<ConstraintViolationException> {
 
     @Override
     public Response toResponse(ConstraintViolationException exception) {
@@ -38,6 +37,7 @@ public class ConstraintViolationExceptionMapper
     private Map<String, String> toErrorMap(ConstraintViolation<?> violation) {
         Map<String, String> errorDetails = new LinkedHashMap<>();
         errorDetails.put("field", getPropertyPath(violation));
+        errorDetails.put("invalidValue", violation.getInvalidValue() != null ? violation.getInvalidValue().toString() : "null");
         errorDetails.put("message", violation.getMessage());
         return errorDetails;
     }

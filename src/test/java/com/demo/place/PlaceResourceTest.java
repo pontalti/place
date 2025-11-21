@@ -244,12 +244,17 @@ class PlaceResourceTest {
         long createdId = firstItem.get("id").asLong();
 
         String updateJsonRaw = readJsonFile(partialUpdateFileName);
+        JsonNode updateNode = objectMapper.readTree(updateJsonRaw);
+        ((com.fasterxml.jackson.databind.node.ObjectNode) updateNode)
+                .put("id", createdId);
+
+        String updatedJson = objectMapper.writeValueAsString(updateNode);
 
         given()
             .contentType(ContentType.JSON)
-            .body(updateJsonRaw)
+            .body(updatedJson)
         .when()
-            .patch("/place/" + createdId)
+            .patch("/place")
         .then()
             .statusCode(200)
             .contentType(ContentType.JSON)

@@ -1,18 +1,18 @@
 package com.demo.place.helper;
 
-import jakarta.ws.rs.BadRequestException;
+import java.util.List;
+
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 
-import java.util.List;
-
 @Provider
-public class BadRequestExceptionMapper implements ExceptionMapper<BadRequestException> {
+public class BadRequestExceptionMapper implements ExceptionMapper<WebApplicationException> {
 
     @Override
-    public Response toResponse(BadRequestException exception) {
+    public Response toResponse(WebApplicationException exception) {
         Throwable cause = exception.getCause();
         String detail = cause != null ? cause.getMessage() : exception.getMessage();
 

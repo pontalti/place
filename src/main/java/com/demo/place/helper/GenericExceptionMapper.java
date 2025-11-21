@@ -12,13 +12,11 @@ import lombok.extern.slf4j.Slf4j;
 @Provider
 public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
 
-
     @Override
     public Response toResponse(Throwable exception) {
-
-        if (exception instanceof WebApplicationException wae) {
-            // já tem Response correto (400, 404, 405, etc.)
-            return wae.getResponse();
+    	
+        if (exception instanceof WebApplicationException webAppEx) {
+            return webAppEx.getResponse();
         }
 
         log.error("Unexpected error", exception);

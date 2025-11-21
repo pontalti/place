@@ -111,7 +111,7 @@ public class PlaceResource {
 	}
 
 	@PUT
-	@Path("/place/{id}")
+	@Path("/place")
 	@Operation(summary = "Update a Place resource", description = "Updates all attributes of a Place resource identified by ID")
 	@RequestBody(required = true, description = "Place payload for full update", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PlaceRecord.class)))
 	@APIResponses({
@@ -120,14 +120,11 @@ public class PlaceResource {
 			@APIResponse(responseCode = "400", description = "Invalid or malformed request") })
 	public Response updatePlace(@Valid PlaceRecord payload) {
 		PlaceRecord updated = placeService.updatePlace(payload);
-		if (updated == null) {
-			return Response.status(Response.Status.NOT_FOUND).build();
-		}
 		return Response.ok(updated).build();
 	}
 
 	@PATCH
-	@Path("/place/{id}")
+	@Path("/place")
 	@Operation(summary = "Partially update a Place resource", description = """
 			Accepts only the attributes that need to be updated.<br>
 			• Any field that is omitted remains unchanged.<br>
@@ -139,14 +136,8 @@ public class PlaceResource {
 			@APIResponse(responseCode = "200", description = "Place partially updated successfully", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PlaceRecord.class))),
 			@APIResponse(responseCode = "404", description = "Place not found"),
 			@APIResponse(responseCode = "400", description = "Invalid or malformed request") })
-	public Response patchPlace(
-			@PathParam("id") @Parameter(name = "id", description = "Place ID", example = "1", required = true) Long placeId,
-			@Valid PlacePatchRecord patchRecord) {
-
-		PlaceRecord updated = placeService.patchPlace(placeId, patchRecord);
-		if (updated == null) {
-			return Response.status(Response.Status.NOT_FOUND).build();
-		}
+	public Response patchPlace(@Valid PlacePatchRecord patchRecord) {
+		PlaceRecord updated = placeService.patchPlace(patchRecord);
 		return Response.ok(updated).build();
 	}
 
@@ -157,7 +148,6 @@ public class PlaceResource {
 			@APIResponse(responseCode = "404", description = "Place not found") })
 	public Response deletePlace(
 			@Parameter(name = "id", description = "Place ID", example = "1", required = true) @PathParam("id") Long id) {
-
 		this.placeService.deleteById(id);
 		return Response.noContent().build();
 	}

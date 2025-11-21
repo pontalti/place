@@ -122,11 +122,11 @@ public class PlaceServiceImpl implements PlaceService {
     @Log
     @Override
     @Transactional
-    public PlaceRecord patchPlace(Long id, PlacePatchRecord patch) {
-        Place place = repository.findById(id);
+    public PlaceRecord patchPlace(PlacePatchRecord patch) {
+        Place place = repository.findById(patch.id());
         if (place == null) {
             throw new WebApplicationException(
-                    "Place not found: " + id,
+                    "Place not found: " + patch.id(),
                     Response.Status.NOT_FOUND
             );
         }

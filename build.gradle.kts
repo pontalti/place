@@ -1,8 +1,6 @@
 plugins {
     java
     id("io.quarkus") version "3.29.3"
-
-    // Integrações IDE
     id("idea")
     id("eclipse")
 }
@@ -25,7 +23,6 @@ java {
 }
 
 dependencies {
-    // --- Alinha todas as versões de extensões Quarkus ---
         implementation(enforcedPlatform(
         "${property("quarkusPlatformGroupId")}:${property("quarkusPlatformArtifactId")}:${property("quarkusPlatformVersion")}"
     ))
@@ -33,15 +30,14 @@ dependencies {
         "${property("quarkusPlatformGroupId")}:${property("quarkusPlatformArtifactId")}:${property("quarkusPlatformVersion")}"
     ))
 
-    // --- Núcleo Quarkus / Web / JPA ---
     implementation("io.quarkus:quarkus-config-yaml")
-    implementation("io.quarkus:quarkus-arc")               // CDI
-    implementation("io.quarkus:quarkus-rest")              // Novo REST (substitui quarkus-resteasy-reactive)
-    implementation("io.quarkus:quarkus-rest-jackson")      // JSON via Jackson
+    implementation("io.quarkus:quarkus-arc")
+    implementation("io.quarkus:quarkus-rest")
+    implementation("io.quarkus:quarkus-rest-jackson")
 
     implementation("io.quarkus:quarkus-hibernate-orm")
     implementation("io.quarkus:quarkus-hibernate-validator")
-    implementation("io.quarkus:quarkus-hibernate-orm-panache") // opcional
+    implementation("io.quarkus:quarkus-hibernate-orm-panache")
     implementation("io.quarkus:quarkus-jdbc-h2")
     implementation("io.quarkus:quarkus-flyway")
    
@@ -50,20 +46,16 @@ dependencies {
    
     implementation("io.quarkus:quarkus-container-image-docker")
 
-    // --- Observabilidade ---
     implementation("io.quarkus:quarkus-smallrye-health")
     implementation("io.quarkus:quarkus-micrometer-registry-prometheus")
 
-    // --- OpenAPI / Swagger ---
     implementation("io.quarkus:quarkus-smallrye-openapi")
 
-    // --- Lombok (opcional) ---
     compileOnly("org.projectlombok:lombok:${property("lombokVersion")}")
     annotationProcessor("org.projectlombok:lombok:${property("lombokVersion")}")
     testCompileOnly("org.projectlombok:lombok:${property("lombokVersion")}")
     testAnnotationProcessor("org.projectlombok:lombok:${property("lombokVersion")}")
 
-    // --- MapStruct ---
     implementation("org.mapstruct:mapstruct:${property("mapstructVersion")}")
     annotationProcessor("org.mapstruct:mapstruct-processor:${property("mapstructVersion")}")
     testAnnotationProcessor("org.mapstruct:mapstruct-processor:${property("mapstructVersion")}")
