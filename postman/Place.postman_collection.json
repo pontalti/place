@@ -41,7 +41,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"label\": \"Stadio Giuseppe Meazza -> Patch\",\r\n  \"days\": [\r\n    { \"dayOfWeek\": \"FRIDAY\", \"startTime\": \"18:00\", \"endTime\": \"23:00\", \"type\": \"OPEN\" },\r\n    { \"id\": 26, \"dayOfWeek\": \"SUNDAY\", \"startTime\": \"17:00\", \"endTime\": \"18:00\", \"type\": \"OPEN\" }\r\n  ]\r\n}",
+					"raw": "{\r\n  \"id\": 3,\r\n  \"label\": \"Stadio Giuseppe Meazza -> Patch\",\r\n  \"days\": [\r\n    { \"dayOfWeek\": \"FRIDAY\", \"startTime\": \"18:00\", \"endTime\": \"23:00\", \"type\": \"OPEN\" },\r\n    { \"id\": 26, \"dayOfWeek\": \"SUNDAY\", \"startTime\": \"17:00\", \"endTime\": \"18:00\", \"type\": \"OPEN\" }\r\n  ]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -49,22 +49,21 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/place/3",
+					"raw": "http://localhost:8080/place",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
-						"place",
-						"3"
+						"place"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "Update palce",
+			"name": "Update place",
 			"request": {
 				"method": "PUT",
 				"header": [],
