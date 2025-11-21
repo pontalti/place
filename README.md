@@ -63,7 +63,7 @@ Hot reload, detailed logs, etc.:
 The app will start on:
 
 ```text
-http://localhost:8081
+http://localhost:8080
 ```
 
 ### Option 2 – via Jar (runner)
@@ -100,12 +100,12 @@ docker logs -f place
 
 The application loads initial data into an H2 in-memory database and exposes the following REST endpoints (Quarkus / RESTEasy Reactive).
 
-> ℹ️ A aplicação está configurada para rodar na porta **8081**.
+> ℹ️ A aplicação está configurada para rodar na porta **8080**.
 
 ### 🏠 Home Endpoint
 
 ```bash
-curl http://localhost:8081/
+curl http://localhost:8080/
 ```
 
 ### 📍 Places
@@ -115,19 +115,19 @@ Base path dos recursos: `/place`.
 #### Get all places
 
 ```bash
-curl http://localhost:8081/place
+curl http://localhost:8080/place
 ```
 
 #### Get place by ID
 
 ```bash
-curl http://localhost:8081/place/1
+curl http://localhost:8080/place/1
 ```
 
 #### Get grouped opening hours by place ID
 
 ```bash
-curl http://localhost:8081/place/1/opening-hours/grouped
+curl http://localhost:8080/place/1/opening-hours/grouped
 ```
 
 #### Create one or multiple places
@@ -135,25 +135,25 @@ curl http://localhost:8081/place/1/opening-hours/grouped
 O endpoint aceita um array de objetos Place.
 
 ```bash
-curl -X POST http://localhost:8081/place   -H "Content-Type: application/json"   -d @/path/to/postman/place.json
+curl -X POST http://localhost:8080/place   -H "Content-Type: application/json"   -d @/path/to/postman/place.json
 ```
 
 #### Delete a place by ID
 
 ```bash
-curl -X DELETE http://localhost:8081/place/{id}
+curl -X DELETE http://localhost:8080/place/{id}
 ```
 
 #### Update a place (full update)
 
 ```bash
-curl -X PUT http://localhost:8081/place/{id}   -H "Content-Type: application/json"   -d @/path/to/postman/place_update.json
+curl -X PUT http://localhost:8080/place   -H "Content-Type: application/json"   -d @/path/to/postman/place_update.json
 ```
 
 #### Partial update (PATCH)
 
 ```bash
-curl -X PATCH http://localhost:8081/place/{id}   -H "Content-Type: application/json"   -d @/path/to/postman/place_partial_update.json
+curl -X PATCH http://localhost:8080/place   -H "Content-Type: application/json"   -d @/path/to/postman/place_partial_update.json
 ```
 
 ---
@@ -175,13 +175,13 @@ With Quarkus + SmallRye OpenAPI + Swagger UI, you can access:
 - Swagger UI:
 
   ```text
-  http://localhost:8081/q/swagger-ui/
+  http://localhost:8080/q/swagger-ui/
   ```
 
 - OpenAPI document (JSON/YAML):
 
   ```text
-  http://localhost:8081/q/openapi
+  http://localhost:8080/q/openapi
   ```
 
 ---
