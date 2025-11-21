@@ -1,6 +1,5 @@
 package com.demo.place.entity;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.annotations.DynamicInsert;
@@ -42,7 +41,6 @@ public class Place {
             orphanRemoval = true,
             fetch = FetchType.EAGER
     )
-    @Builder.Default
-    private List<DayOpening> days = new ArrayList<>();
+    private List<DayOpening> days;
 
 }

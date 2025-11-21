@@ -57,16 +57,16 @@ dependencies {
     // --- OpenAPI / Swagger ---
     implementation("io.quarkus:quarkus-smallrye-openapi")
 
-    // --- MapStruct ---
-    implementation("org.mapstruct:mapstruct:${property("mapstructVersion")}")
-    annotationProcessor("org.mapstruct:mapstruct-processor:${property("mapstructVersion")}")
-    testAnnotationProcessor("org.mapstruct:mapstruct-processor:${property("mapstructVersion")}")
-
     // --- Lombok (opcional) ---
     compileOnly("org.projectlombok:lombok:${property("lombokVersion")}")
     annotationProcessor("org.projectlombok:lombok:${property("lombokVersion")}")
     testCompileOnly("org.projectlombok:lombok:${property("lombokVersion")}")
     testAnnotationProcessor("org.projectlombok:lombok:${property("lombokVersion")}")
+
+    // --- MapStruct ---
+    implementation("org.mapstruct:mapstruct:${property("mapstructVersion")}")
+    annotationProcessor("org.mapstruct:mapstruct-processor:${property("mapstructVersion")}")
+    testAnnotationProcessor("org.mapstruct:mapstruct-processor:${property("mapstructVersion")}")
 
     // --- Testes ---
     testImplementation("io.quarkus:quarkus-junit5")
@@ -90,7 +90,7 @@ tasks.jar {
 
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
-    options.compilerArgs.add("-Amapstruct.defaultComponentModel=cdi")
+    options.compilerArgs.add("-Amapstruct.defaultComponentModel=jakarta")
     options.compilerArgs.add("-parameters")
 }
 

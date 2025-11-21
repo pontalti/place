@@ -8,8 +8,8 @@ import com.demo.place.records.PlaceRecord;
 import org.mapstruct.*;
 
 @Mapper(
-    componentModel = "cdi",
-    unmappedTargetPolicy = ReportingPolicy.IGNORE
+	    componentModel = "jakarta",
+	    unmappedTargetPolicy = ReportingPolicy.IGNORE
 )
 public interface PlaceMapper {
 
