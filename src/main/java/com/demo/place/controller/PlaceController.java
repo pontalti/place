@@ -163,30 +163,30 @@ public class PlaceController {
     @Operation(
             summary = "Partially update a Place resource",
             description = """
-                    Accepts only the attributes that need to be updated.<br>
-                    • Any field that is omitted remains unchanged.<br>
-                    • The days list (opening hours) may be sent in full or partially;
-                    the supplied days overwrite the existing entries with the same index/day.
+                    Updates only the attributes provided in the PATCH request body.
+                    
+                    **Validation Rules:**
+                    1. The `id` field is **mandatory** (required) in the request body.
+                    2. At least **one** update field (`label`, `location`, or `days`) must be supplied.
+                    
+                    **Update Behavior:**
+                    • Any field (excluding `id`) that is **omitted** from the JSON remains unchanged in the resource.
+                    • The `days` list (opening hours) is typically treated as a *sub-resource*; the supplied list will be processed by the service to merge or overwrite existing entries.
                     """,
-            parameters = {
-                    @Parameter(name = "id", description = "Place ID", example = "1", required = true)
-            },
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Resource updated",
+                    @ApiResponse(responseCode = "200", description = "Resource updated successfully",
                             content = @Content(schema = @Schema(implementation = PlaceRecord.class))),
                     @ApiResponse(responseCode = "404", description = "Resource not found",
                             content = @Content),
-                    @ApiResponse(responseCode = "400", description = "Invalid request",
+                    @ApiResponse(responseCode = "400", description = "Invalid request (validation failure or malformed payload)",
                             content = @Content)
             }
     )
-    @PatchMapping(value = "/place/{id}",
+    @PatchMapping(value = "/place",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PlaceRecord> patchPlace(@PathVariable("id") @NotNull Long id,
-                                                  @Valid @RequestBody PlacePatchRecord patch) {
-
-        PlaceRecord updated = this.placeService.patchPlace(id, patch);
+    public ResponseEntity<PlaceRecord> patchPlace(@Valid @RequestBody PlacePatchRecord patch) {
+        PlaceRecord updated = this.placeService.patchPlace(patch);
         return ResponseEntity.ok(updated);
     }
 }

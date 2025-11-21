@@ -1,4 +1,4 @@
-package com.demo.place.aop;
+package com.demo.place.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

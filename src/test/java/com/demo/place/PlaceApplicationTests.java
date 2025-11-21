@@ -201,9 +201,10 @@ class PlaceApplicationTests {
         var updateJsonRaw = readJsonFile(partialUpdateFileName);
         var updateNode = this.objectMapper.readTree(updateJsonRaw);
 
+        ((com.fasterxml.jackson.databind.node.ObjectNode) updateNode).put("id", createdId);
         var updatedJson = this.objectMapper.writeValueAsString(updateNode);
 
-        this.mockMvc.perform(patch("/place/" + createdId)
+        this.mockMvc.perform(patch("/place")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updatedJson))
                 .andExpect(status().isOk())

@@ -1,6 +1,6 @@
 plugins {
     java
-    id("org.springframework.boot") version "3.5.7"
+    id("org.springframework.boot") version "3.5.8"
     id("io.spring.dependency-management") version "1.1.4"
 
     // IDE integrations
@@ -32,8 +32,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-aop")
 
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:${property("springdocOpenapiVersion")}")
-    implementation("org.mapstruct:mapstruct:${property("mapstructVersion")}")
-
+    
     runtimeOnly("com.h2database:h2")
     
     implementation("org.flywaydb:flyway-core")
@@ -45,6 +44,7 @@ dependencies {
     testAnnotationProcessor("org.projectlombok:lombok")
 
     // MapStruct processors
+    implementation("org.mapstruct:mapstruct:${property("mapstructVersion")}")
     annotationProcessor("org.mapstruct:mapstruct-processor:${property("mapstructVersion")}")
     testAnnotationProcessor("org.mapstruct:mapstruct-processor:${property("mapstructVersion")}")
 
@@ -71,6 +71,7 @@ tasks.bootJar {
 
 // Force MapStruct to generate Spring components (@Mapper(componentModel = "spring"))
 tasks.withType<JavaCompile>().configureEach {
+	options.encoding = "UTF-8"
     options.compilerArgs.add("-Amapstruct.defaultComponentModel=spring")
 }
 

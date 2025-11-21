@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.demo.place.aop.Log;
+import com.demo.place.annotation.Log;
 import com.demo.place.entity.Place;
 import com.demo.place.mapper.PlaceMapper;
 import com.demo.place.records.PlacePatchRecord;
@@ -103,10 +103,10 @@ public class PlaceServiceImpl implements PlaceService {
     @Log
     @Override
     @Transactional
-    public PlaceRecord patchPlace(Long id, PlacePatchRecord patch) {
-        var place = repository.findById(id)
+    public PlaceRecord patchPlace(PlacePatchRecord patch) {
+        var place = repository.findById(patch.id())
                 .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Place not found: " + id));
+                        HttpStatus.NOT_FOUND, "Place not found: " + patch.id()));
 
         if (patch.label() != null) {
             place.setLabel(patch.label());

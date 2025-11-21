@@ -17,6 +17,6 @@ public interface PlaceService {
 
     public PlaceRecord updatePlace(PlaceRecord updatedPlace);
 
-    public PlaceRecord patchPlace(Long id, PlacePatchRecord patch);
+    public PlaceRecord patchPlace(PlacePatchRecord patch);
 
 }
