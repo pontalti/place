@@ -4,183 +4,25 @@ Place - code challenge.
 
 ---
 
-## 🔧 Development Environment
+## 🧭 Project Branches
 
-- **OS:** Fedora 42
-- **JDK:** 25
-- **Build Tool:** Gradle 9.1.0
-- **Version Control:** Git 2.51.0
-- **API Testing Tool:** Postman and curl
+This repository contains **two implementations** of the same API:
 
----
+- **Spring Boot**: branch  
+  [`feature/springboot`](https://github.com/pontalti/place/tree/feature/springboot)  
+  Original implementation using Spring Boot.
 
-## 🚀 Getting Started
+- **Quarkus**: branch  
+  [`feature/quarkus`](https://github.com/pontalti/place/tree/feature/quarkus)  
+  Current implementation using Quarkus (this is **the** documentation).
 
-### 1. Clone the Repository
-
-```bash
-git clone git@github.com:pontalti/place.git
-cd place
-```
-
-Or visit the repo: [https://github.com/pontalti/place](https://github.com/pontalti/place)
-
-### 2. Requirements
-
-Make sure the following are installed:
-
-- [JDK 25](https://openjdk.org/projects/jdk/25/)
-- [Gradle 9.1.0](https://gradle.org/)
-- Your favorite IDE (VSCode, IntelliJ, Eclipse, etc.)
-- **(Optional)** [Docker Desktop](https://www.docker.com/products/docker-desktop/) – only
-  required if you want to run the application in containers.
-
----
-
-## 🛠 Build the Project
-
-Navigate to the project root folder and run:
+To switch between versions:
 
 ```bash
-./gradlew clean build --refresh-dependencies
-```
+# Spring Boot
+git checkout feature/springboot
 
----
+# Quarkus
+git checkout feature/quarkus
 
-## ▶️ Run the Application
-
-From the project root folder:
-
-### Option 1 – via Gradle
-
-```bash
-./gradlew bootRun
-```
-
-### Option 2 – via Jar
-
-```bash
-java -jar build/libs/place.jar
-```
-
-### Option 3 – via Container (Docker)
-
-Build the container image(s):
-
-```bash
-docker-compose build
-```
-
-Start the containers in detached mode:
-
-```bash
-docker-compose up -d
-```
-
-Follow the application logs:
-
-```bash
-docker logs -f place
-```
-
----
-
-## 🌐 API Overview
-
-The application loads initial data into an **H2 in-memory database** and exposes the following REST endpoints:
-
-### 🏠 Home Endpoint
-
-```bash
-curl http://localhost:8080/
-```
-
-### 📍 Places
-
-#### Get all places
-
-```bash
-curl http://localhost:8080/places
-```
-
-#### Get place by ID
-
-```bash
-curl http://localhost:8080/places/1
-```
-
-#### Get grouped opening hours by place ID
-
-```bash
-curl http://localhost:8080/places/1/opening-hours/grouped
-```
-
-#### Create one or multiple places
-
-```bash
-curl -X POST http://localhost:8080/places -H "Content-Type: application/json" -d @/path/to/postman/places.json
-```
-
-#### Delete a place by ID
-
-```bash
-curl -X DELETE http://localhost:8080/places/{id}
-```
-
-#### Update a place
-
-```bash
-curl -X PUT http://localhost:8080/places/ -H "Content-Type: application/json" -d @/path/to/postman/place_update.json
-```
-
-#### Update a partial place
-
-```bash
-curl -X PATCH http://localhost:8080/places/{id} -H "Content-Type: application/json" -d @/path/to/postman/place_partial_update.json
-```
-
-> 💡 Replace `/path/to/postman/places.json` with the full path to your JSON file.
-
----
-
-## 🧪 Using Postman
-
-You can import a predefined collection to test all endpoints easily:
-
-```text
-<PROJECT_ROOT>/postman/place.postman_collection.json
-```
-
----
-
-## 🧬 OpenAPI Documentation (Swagger)
-
-Access the API documentation via Swagger UI:
-
-```text
-http://localhost:8080/swagger-ui/swagger-ui/index.html
-```
-
----
-
-## 🧰 Additional Tools
-
-### Install `curl` (if not already available)
-
-#### Windows
-
-```bash
-choco install curl
-```
-
-#### Linux (Debian/Ubuntu)
-
-```bash
-sudo apt-get install curl
-```
-
-#### Linux (Fedora)
-
-```bash
-sudo dnf install curl
 ```
