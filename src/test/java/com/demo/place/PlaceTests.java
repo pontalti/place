@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(webEnvironment = WebEnvironment.MOCK, classes = PlaceApplication.class)
 @AutoConfigureMockMvc
-class PlaceApplicationTests {
+public class PlaceTests {
 
     @Autowired
     private MockMvc mockMvc;
@@ -40,16 +40,8 @@ class PlaceApplicationTests {
     }
 
     @Test
-    @DisplayName("Test home endpoint")
-    void homeEndpoint() throws Exception {
-        this.mockMvc.perform(get("/"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Place - code challenge - Home!"));
-    }
-
-    @Test
     @DisplayName("Test getAllplace endpoint")
-    void getAllplace() throws Exception {
+    public void getAllplace() throws Exception {
         this.mockMvc.perform(get("/place"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
@@ -57,7 +49,7 @@ class PlaceApplicationTests {
 
     @Test
     @DisplayName("Test getPlaceById endpoint")
-    void getPlaceById() throws Exception {
+    public void getPlaceById() throws Exception {
         this.mockMvc.perform(get("/place/1"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
@@ -65,14 +57,14 @@ class PlaceApplicationTests {
 
     @Test
     @DisplayName("Test deleteById endpoint")
-    void deleteById() throws Exception {
+    public void deleteById() throws Exception {
         this.mockMvc.perform(delete("/place/2"))
                 .andExpect(status().isOk());
     }
 
     @Test
     @DisplayName("Test createPlace endpoint")
-    void createPlace() throws Exception {
+    public void createPlace() throws Exception {
         var json = readJsonFile("place.json");
 
         this.mockMvc.perform(post("/place")
@@ -84,7 +76,7 @@ class PlaceApplicationTests {
 
     @Test
     @DisplayName("Test createPlace endpoint - bad request validation")
-    void createPlaceBadRequest() throws Exception {
+    public void createPlaceBadRequest() throws Exception {
         var json = readJsonFile("place_bad_request.json");
 
         this.mockMvc.perform(post("/place")
@@ -96,7 +88,7 @@ class PlaceApplicationTests {
 
     @Test
     @DisplayName("Test createPlace endpoint - bad request validation")
-    void createPlaceMalformed() throws Exception {
+    public void createPlaceMalformed() throws Exception {
         var json = readJsonFile("place_malformed.json");
 
         this.mockMvc.perform(post("/place")
@@ -109,7 +101,7 @@ class PlaceApplicationTests {
     @ParameterizedTest
     @DisplayName("Test createPlace endpoint - bad request validation for wrong time")
     @CsvSource({"place_wrong_time_1.json", "place_wrong_time_2.json", "place_wrong_time_3.json"})
-    void createPlaceWrongTime(String fileName) throws Exception {
+    public void createPlaceWrongTime(String fileName) throws Exception {
         var json = readJsonFile(fileName);
 
         this.mockMvc.perform(post("/place")
@@ -121,7 +113,7 @@ class PlaceApplicationTests {
 
     @Test
     @DisplayName("Test groupedOpeningHoursStructure endpoint")
-    void groupedOpeningHoursStructure() throws Exception {
+    public void groupedOpeningHoursStructure() throws Exception {
         var response = mockMvc.perform(get("/place/1/opening-hours/grouped")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -147,7 +139,7 @@ class PlaceApplicationTests {
     @ParameterizedTest
     @DisplayName("Test updatePlace endpoint - full update")
     @CsvSource({"place.json,place_update.json"})
-    void updatePlace(String createFileName, String updateFileName) throws Exception {
+    public void updatePlace(String createFileName, String updateFileName) throws Exception {
         var createdJson = readJsonFile(createFileName);
         var postResult = mockMvc.perform(post("/place")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -182,7 +174,7 @@ class PlaceApplicationTests {
     @ParameterizedTest
     @DisplayName("Test updatePlace endpoint - full update")
     @CsvSource({"place.json,place_partial_update.json"})
-    void partialUpdatePlace(String createFileName, String partialUpdateFileName) throws Exception {
+    public void partialUpdatePlace(String createFileName, String partialUpdateFileName) throws Exception {
         var createdJson = readJsonFile(createFileName);
         var postResult = mockMvc.perform(post("/place")
                         .contentType(MediaType.APPLICATION_JSON)

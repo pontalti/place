@@ -1,20 +1,30 @@
 package com.demo.place.mapper;
 
+import java.util.List;
+
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+
 import com.demo.place.entity.DayOpening;
 import com.demo.place.entity.Place;
 import com.demo.place.records.DayOpeningRecord;
 import com.demo.place.records.PlacePatchRecord;
 import com.demo.place.records.PlaceRecord;
-import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface PlaceMapper {
 
     PlaceRecord toRecord(Place entity);
+    
+    List<PlaceRecord> toRecord(List<Place> placeList);
 
     DayOpeningRecord toRecord(DayOpening entity);
 
     Place toEntity(PlaceRecord record);
+    
+    List<Place> toEntity(List<PlaceRecord> recordList);
 
     DayOpening toEntity(DayOpeningRecord record);
 

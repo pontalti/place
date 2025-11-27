@@ -24,18 +24,12 @@ import java.util.List;
 
 @Tag(name = "Place", description = "Endpoints to manage places and fetch grouped opening hours")
 @RestController
+@RequestMapping(path = "/place")
 @RequiredArgsConstructor
 public class PlaceController {
 
     private final PlaceService placeService;
     private final GroupPlaceService groupPlaceService;
-
-    @Operation(summary = "Home", description = "place API home page")
-    @ApiResponse(responseCode = "200", description = "Welcome message")
-    @GetMapping(path = "/")
-    public ResponseEntity<String> home() {
-        return ResponseEntity.ok("Place - code challenge - Home!");
-    }
 
     @Operation(
             summary = "Create multiple places",
@@ -51,7 +45,7 @@ public class PlaceController {
                     @ApiResponse(responseCode = "400", description = "Invalid payload or empty list")
             }
     )
-    @PostMapping(path = "/place", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<PlaceRecord>> savePlace(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "List of PlaceRecord to be created",
@@ -73,7 +67,7 @@ public class PlaceController {
             summary = "List all places",
             responses = @ApiResponse(responseCode = "200", description = "Returns list of places")
     )
-    @GetMapping(path = "/place", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<PlaceRecord>> listAll() {
         var list = this.placeService.listAll();
         return ResponseEntity.ok(list);
@@ -95,7 +89,7 @@ public class PlaceController {
                     @ApiResponse(responseCode = "404", description = "Place not found")
             }
     )
-    @GetMapping(path = "/place/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PlaceRecord> findById(
             @PathVariable("id") @NotNull Long id
     ) {
@@ -114,7 +108,7 @@ public class PlaceController {
                     )
             )
     )
-    @GetMapping(path = "/place/{id}/opening-hours/grouped", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/{id}/opening-hours/grouped", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupedPlaceRecord> getGroupedOpeningHoursByPlaceId(
             @PathVariable("id") @NotNull Long id
     ) {
@@ -130,7 +124,7 @@ public class PlaceController {
                     @ApiResponse(responseCode = "404", description = "Place not found")
             }
     )
-    @DeleteMapping(path = "/place/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> deleteById(
             @PathVariable("id") @NotNull Long id
     ) {
@@ -150,7 +144,7 @@ public class PlaceController {
                             content = @Content)
             }
     )
-    @PutMapping(value = "/place", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PlaceRecord> updatePlace(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "The Place resource with updated data",
@@ -182,9 +176,7 @@ public class PlaceController {
                             content = @Content)
             }
     )
-    @PatchMapping(value = "/place",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PlaceRecord> patchPlace(@Valid @RequestBody PlacePatchRecord patch) {
         PlaceRecord updated = this.placeService.patchPlace(patch);
         return ResponseEntity.ok(updated);
