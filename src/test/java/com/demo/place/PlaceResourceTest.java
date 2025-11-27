@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
+import org.eclipse.microprofile.config.ConfigProvider;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,11 +23,18 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import jakarta.inject.Inject;
 
 @QuarkusTest
-class PlaceResourceTest {
+public class PlaceResourceTest {
+	
+    @BeforeAll
+    static void setupBasePath() {
+        String apiVersion = ConfigProvider.getConfig().getValue("api.version", String.class);
+        RestAssured.basePath = "/api/" + apiVersion;
+    }
 
     @Inject
     private ObjectMapper objectMapper;
@@ -43,18 +52,8 @@ class PlaceResourceTest {
     }
 
     @Test
-    @DisplayName("Test home endpoint")
-    void homeEndpoint() {
-        given()
-          .when().get("/")
-          .then()
-             .statusCode(200)
-             .body(is("Hello from Quarkus REST"));
-    }
-
-    @Test
     @DisplayName("Test getAllplace endpoint")
-    void getAllplace() {
+    public void getAllplace() {
         given()
             .accept(ContentType.JSON)
         .when()
@@ -66,7 +65,7 @@ class PlaceResourceTest {
 
     @Test
     @DisplayName("Test getPlaceById endpoint")
-    void getPlaceById() {
+    public void getPlaceById() {
         given()
             .accept(ContentType.JSON)
         .when()
@@ -78,7 +77,7 @@ class PlaceResourceTest {
 
     @Test
     @DisplayName("Test deleteById endpoint")
-    void deleteById() {
+    public void deleteById() {
         given()
         .when()
             .delete("/place/2")
@@ -88,7 +87,7 @@ class PlaceResourceTest {
 
     @Test
     @DisplayName("Test createPlace endpoint")
-    void createPlace() throws IOException {
+    public void createPlace() throws IOException {
         String json = readJsonFile("place.json");
 
         given()
@@ -104,7 +103,7 @@ class PlaceResourceTest {
 
     @Test
     @DisplayName("Test createPlace endpoint - bad request validation")
-    void createPlaceBadRequest() throws IOException {
+    public void createPlaceBadRequest() throws IOException {
         String json = readJsonFile("place_bad_request.json");
 
         given()
@@ -119,7 +118,7 @@ class PlaceResourceTest {
 
     @Test
     @DisplayName("Test createPlace endpoint - malformed json")
-    void createPlaceMalformed() throws IOException {
+    public void createPlaceMalformed() throws IOException {
         String json = readJsonFile("place_malformed.json");
 
         given()
@@ -135,7 +134,7 @@ class PlaceResourceTest {
     @ParameterizedTest
     @DisplayName("Test createPlace endpoint - bad request validation for wrong time")
     @CsvSource({"place_wrong_time_1.json", "place_wrong_time_2.json", "place_wrong_time_3.json"})
-    void createPlaceWrongTime(String fileName) throws IOException {
+    public void createPlaceWrongTime(String fileName) throws IOException {
         String json = readJsonFile(fileName);
 
         given()
@@ -150,7 +149,7 @@ class PlaceResourceTest {
 
     @Test
     @DisplayName("Test groupedOpeningHoursStructure endpoint")
-    void groupedOpeningHoursStructure() throws IOException {
+    public void groupedOpeningHoursStructure() throws IOException {
         String response =
             given()
                 .accept(ContentType.JSON)
@@ -184,7 +183,7 @@ class PlaceResourceTest {
     @ParameterizedTest
     @DisplayName("Test updatePlace endpoint - full update")
     @CsvSource({"place.json,place_update.json"})
-    void updatePlace(String createFileName, String updateFileName) throws IOException {
+    public void updatePlace(String createFileName, String updateFileName) throws IOException {
         String createdJson = readJsonFile(createFileName);
         String postResult =
                 given()
@@ -225,7 +224,7 @@ class PlaceResourceTest {
     @ParameterizedTest
     @DisplayName("Test updatePlace endpoint - partial update")
     @CsvSource({"place.json,place_partial_update.json"})
-    void partialUpdatePlace(String createFileName, String partialUpdateFileName) throws IOException {
+    public void partialUpdatePlace(String createFileName, String partialUpdateFileName) throws IOException {
         String createdJson = readJsonFile(createFileName);
         String postResult =
                 given()

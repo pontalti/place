@@ -5,6 +5,9 @@ import com.demo.place.entity.Place;
 import com.demo.place.records.DayOpeningRecord;
 import com.demo.place.records.PlacePatchRecord;
 import com.demo.place.records.PlaceRecord;
+
+import java.util.List;
+
 import org.mapstruct.*;
 
 @Mapper(
@@ -14,10 +17,14 @@ import org.mapstruct.*;
 public interface PlaceMapper {
 
     PlaceRecord toRecord(Place entity);
+    
+    List<PlaceRecord> toRecord(List<Place> placeList);
 
     DayOpeningRecord toRecord(DayOpening entity);
 
     Place toEntity(PlaceRecord record);
+    
+    List<Place> toEntity(List<PlaceRecord> recordList);
 
     DayOpening toEntity(DayOpeningRecord record);
 

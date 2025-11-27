@@ -1,14 +1,18 @@
+api:
+  version: v1
 quarkus:
+  http:
+    root-path: /api/${api.version}
   package:
     jar:
       enabled: true
       type: fast-jar
   container-image:
-    build: false           # manda construir a imagem no build
-    push: false            # não fazer push pro registry (por enquanto)
-    group: com.demo.place  # parte antes da barra (repo/namespace)
-    name: place2           # nome da imagem
-    tag: "0.0.1-SNAPSHOT"  # tag (opcional; default é a versão do projeto)
+    build: false          	# To build the docker image
+    push: false 			# Don't push to registry (for now).
+    group: com.demo.place 	# parte antes da barra (repo/namespace)
+    name: place				# image name
+    tag: "0.0.1-SNAPSHOT"   # tag (optional; default is the project version)
 
   datasource:
     db-kind: h2

@@ -31,15 +31,9 @@ public class PlaceServiceImpl implements PlaceService {
     @Override
     @Transactional
     public List<PlaceRecord> savePlace(List<PlaceRecord> places) {
-        var entities = places.stream()
-                .map(this::buildEntity)
-                .collect(Collectors.toList());
-
-        repository.persist(entities);
-
-        return entities.stream()
-                .map(mapper::toRecord)
-                .collect(Collectors.toList());
+    	var placeEntityList = buildEntity(places);
+        repository.persist(placeEntityList);
+        return mapper.toRecord(placeEntityList);
     }
 
     @Log
@@ -112,11 +106,12 @@ public class PlaceServiceImpl implements PlaceService {
         return mapper.toRecord(existingPlace);
     }
 
-
-    protected Place buildEntity(PlaceRecord record) {
-        var place = mapper.toEntity(record);
-        place.getDays().forEach(d -> d.setPlace(place));
-        return place;
+    protected List<Place> buildEntity(List<PlaceRecord> record) {
+    	var placeEntityList = mapper.toEntity(record);
+    	for( Place place : placeEntityList ) {
+    		place.getDays().forEach(d -> d.setPlace(place));    		
+    	}
+        return placeEntityList;
     }
 
     @Log

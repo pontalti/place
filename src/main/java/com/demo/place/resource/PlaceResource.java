@@ -33,7 +33,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 
-@Path("/")
+@Path("/place")
 @ApplicationScoped
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -43,18 +43,8 @@ public class PlaceResource {
 	private final PlaceService placeService;
 	private final GroupPlaceService groupPlaceService;
 
-    @GET
-    @Path("/")
-    @Operation(
-            summary = "Home",
-            description = "place API home page"
-    )
-    public Response home() {
-        return Response.ok("Hello from Quarkus REST").build();
-    }
-
 	@POST
-	@Path("/place")
+	@Path("")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(summary = "Create multiple places", description = "Saves a list of validated places")
@@ -73,7 +63,7 @@ public class PlaceResource {
 	}
 
 	@GET
-	@Path("/place")
+	@Path("")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(summary = "Lista todos os lugares", description = "Retorna a lista de lugares cadastrados")
 	@APIResponse(responseCode = "200", description = "Lista de lugares", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PlaceRecord.class)))
@@ -83,7 +73,7 @@ public class PlaceResource {
 	}
 	
 	@GET
-	@Path("/place/{id}")
+	@Path("/{id}")
 	@Operation(summary = "Fetch a Place by ID", description = "Returns a place details")
     public Response findById(@PathParam("id") @Parameter(name = "id", description = "Place ID", example = "1", required = true) Long id) {
         var place = this.placeService.findById(id);
@@ -91,7 +81,7 @@ public class PlaceResource {
     }
 
 	@GET
-	@Path("/place/{id}/opening-hours/grouped")
+	@Path("/{id}/opening-hours/grouped")
 	@Operation(summary = "Fetch a Place by ID", description = "Returns a place details and its grouped opening hours")
 	@APIResponses({
 			@APIResponse(responseCode = "200", description = "Place found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GroupedPlaceRecord.class))),
@@ -102,7 +92,7 @@ public class PlaceResource {
 	}
 
 	@PUT
-	@Path("/place")
+	@Path("")
 	@Operation(summary = "Update a Place resource", description = "Updates all attributes of a Place resource identified by ID")
 	@RequestBody(required = true, description = "Place payload for full update", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PlaceRecord.class)))
 	@APIResponses({
@@ -115,7 +105,7 @@ public class PlaceResource {
 	}
 
 	@PATCH
-	@Path("/place")
+	@Path("")
 	@Operation(summary = "Partially update a Place resource", description = """
                 Updates only the attributes provided in the PATCH request body.
                 
@@ -138,7 +128,7 @@ public class PlaceResource {
 	}
 
 	@DELETE
-	@Path("/place/{id}")
+	@Path("/{id}")
 	@Operation(summary = "Delete a Place resource", description = "Deletes a Place resource by ID")
 	@APIResponses({ @APIResponse(responseCode = "204", description = "Place removed successfully"),
 			@APIResponse(responseCode = "404", description = "Place not found") })
