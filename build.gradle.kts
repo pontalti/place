@@ -1,7 +1,7 @@
 plugins {
     java
-    id("org.springframework.boot") version "3.5.8"
-    id("io.spring.dependency-management") version "1.1.4"
+    id("org.springframework.boot") version "4.0.0"
+    id("io.spring.dependency-management") version "1.1.7"
 
     // IDE integrations
     id("idea")
@@ -16,7 +16,7 @@ repositories {
     mavenCentral()
 }
 
-extra["springdocOpenapiVersion"] = "2.8.14"
+extra["springdocOpenapiVersion"] = "3.0.0"
 extra["mapstructVersion"] = "1.6.3"
 
 java {
@@ -26,16 +26,15 @@ java {
 }
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-aop")
-
+    implementation("org.springframework.boot:spring-boot-starter-aspectj")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-flyway")
+    
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:${property("springdocOpenapiVersion")}")
     
     runtimeOnly("com.h2database:h2")
-    
-    implementation("org.flywaydb:flyway-core")
 
     // Lombok (optional)
     compileOnly("org.projectlombok:lombok")
@@ -51,8 +50,8 @@ dependencies {
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-aspectj-test")
 }
 
 tasks.withType<Test> {

@@ -1,38 +1,46 @@
 package com.demo.place;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.util.StreamUtils;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 @SpringBootTest(webEnvironment = WebEnvironment.MOCK, classes = PlaceApplication.class)
 @AutoConfigureMockMvc
 public class PlaceTests {
 
+	@Autowired
+	private JsonMapper objectMapper;
+
     @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
+      
     private static String readJsonFile(String fileName) throws IOException {
         return StreamUtils.copyToString(
                 new ClassPathResource(fileName).getInputStream(),
@@ -128,11 +136,11 @@ public class PlaceTests {
         var openingHours = json.get("openingHours");
 
         for (JsonNode group : openingHours) {
-            assertThat(group.get("day").isTextual()).isTrue();
+            assertThat(group.get("day").isString()).isTrue();
 
             var hours = group.get("intervals");
             assertThat(hours).isNotNull();
-            assertThat(hours.isArray() || hours.isTextual()).isTrue();
+            assertThat(hours.isArray() || hours.isString()).isTrue();
         }
     }
 
@@ -156,9 +164,9 @@ public class PlaceTests {
         var createdId = firstItem.get("id").asLong();
 
         var updateJsonRaw = readJsonFile(updateFileName);
-        var updateNode = this.objectMapper.readTree(updateJsonRaw);
+        var updateNode = (ObjectNode) this.objectMapper.readTree(updateJsonRaw);
 
-        ((com.fasterxml.jackson.databind.node.ObjectNode) updateNode).put("id", createdId);
+        updateNode.put("id", createdId);
         var updatedJson = this.objectMapper.writeValueAsString(updateNode);
 
         this.mockMvc.perform(put("/place")
@@ -191,9 +199,9 @@ public class PlaceTests {
         var createdId = firstItem.get("id").asLong();
 
         var updateJsonRaw = readJsonFile(partialUpdateFileName);
-        var updateNode = this.objectMapper.readTree(updateJsonRaw);
+        var updateNode = (ObjectNode) this.objectMapper.readTree(updateJsonRaw);
 
-        ((com.fasterxml.jackson.databind.node.ObjectNode) updateNode).put("id", createdId);
+        updateNode.put("id", createdId);
         var updatedJson = this.objectMapper.writeValueAsString(updateNode);
 
         this.mockMvc.perform(patch("/place")
