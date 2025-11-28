@@ -3,7 +3,10 @@ plugins {
     id("io.quarkus") version "3.29.3"
     id("idea")
     id("eclipse")
+    id ("com.diffplug.eclipse.apt") version "4.3.0"
 }
+
+extra["mapstructVersion"] = "1.6.3"
 
 group = "com.demo.place"
 version = "0.0.1-SNAPSHOT"
@@ -23,10 +26,7 @@ java {
 }
 
 dependencies {
-        implementation(enforcedPlatform(
-        "${property("quarkusPlatformGroupId")}:${property("quarkusPlatformArtifactId")}:${property("quarkusPlatformVersion")}"
-    ))
-    testImplementation(enforcedPlatform(
+    implementation(enforcedPlatform(
         "${property("quarkusPlatformGroupId")}:${property("quarkusPlatformArtifactId")}:${property("quarkusPlatformVersion")}"
     ))
 
@@ -64,6 +64,11 @@ dependencies {
     testImplementation("io.quarkus:quarkus-junit5")
     testImplementation("io.rest-assured:rest-assured")
     testImplementation("org.assertj:assertj-core:3.26.0")
+
+    testImplementation(enforcedPlatform(
+        "${property("quarkusPlatformGroupId")}:${property("quarkusPlatformArtifactId")}:${property("quarkusPlatformVersion")}"
+    ))
+
 }
 
 tasks.withType<Test>().configureEach {
@@ -82,7 +87,7 @@ tasks.jar {
 
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
-    options.compilerArgs.add("-Amapstruct.defaultComponentModel=jakarta")
+    options.compilerArgs.add("-Amapstruct.defaultComponentModel=jakarta-cdi")
     options.compilerArgs.add("-parameters")
 }
 

@@ -1,17 +1,21 @@
 package com.demo.place.mapper;
 
+import java.util.List;
+
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.ReportingPolicy;
+
 import com.demo.place.entity.DayOpening;
 import com.demo.place.entity.Place;
 import com.demo.place.records.DayOpeningRecord;
 import com.demo.place.records.PlacePatchRecord;
 import com.demo.place.records.PlaceRecord;
 
-import java.util.List;
-
-import org.mapstruct.*;
-
 @Mapper(
-	    componentModel = "jakarta",
+	    componentModel = "jakarta-cdi",
 	    unmappedTargetPolicy = ReportingPolicy.IGNORE
 )
 public interface PlaceMapper {
