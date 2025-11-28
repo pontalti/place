@@ -6,6 +6,7 @@ plugins {
     // IDE integrations
     id("idea")
     id("eclipse")
+    id ("com.diffplug.eclipse.apt") version "4.3.0"
 }
 
 group = "com.demo.place"
