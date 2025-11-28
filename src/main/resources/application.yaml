@@ -1,5 +1,6 @@
 api:
   version: v1
+  
 quarkus:
   http:
     root-path: /api/${api.version}
@@ -23,8 +24,9 @@ quarkus:
   hibernate-orm:
     log:
       sql: true
-    database:
-      generation: validate
+    default-datasource:
+      database:
+        generation: validate
     physical-naming-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
 
   flyway:

@@ -15,7 +15,7 @@ import io.restassured.RestAssured;
 public class HomeResourceTest {
 	
     @BeforeAll
-    static void setupBasePath() {
+    public static void setupBasePath() {
         String apiVersion = ConfigProvider.getConfig().getValue("api.version", String.class);
         RestAssured.basePath = "/api/" + apiVersion;
     }

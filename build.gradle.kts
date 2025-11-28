@@ -1,12 +1,10 @@
 plugins {
     java
-    id("io.quarkus") version "3.29.3"
+    id("io.quarkus")
     id("idea")
     id("eclipse")
     id ("com.diffplug.eclipse.apt") version "4.3.0"
 }
-
-extra["mapstructVersion"] = "1.6.3"
 
 group = "com.demo.place"
 version = "0.0.1-SNAPSHOT"
@@ -17,23 +15,19 @@ repositories {
     mavenLocal()
 }
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
-    }
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
-}
+val quarkusPlatformGroupId: String by project
+val quarkusPlatformArtifactId: String by project
+val quarkusPlatformVersion: String by project
+val mapstructVersion: String by project
+val lombokVersion: String by project
 
 dependencies {
-    implementation(enforcedPlatform(
-        "${property("quarkusPlatformGroupId")}:${property("quarkusPlatformArtifactId")}:${property("quarkusPlatformVersion")}"
-    ))
-
-    implementation("io.quarkus:quarkus-config-yaml")
+    implementation(enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}"))
     implementation("io.quarkus:quarkus-arc")
     implementation("io.quarkus:quarkus-rest")
+	implementation("io.quarkus:quarkus-rest")
     implementation("io.quarkus:quarkus-rest-jackson")
+    implementation("io.quarkus:quarkus-config-yaml")
 
     implementation("io.quarkus:quarkus-hibernate-orm")
     implementation("io.quarkus:quarkus-hibernate-validator")
@@ -50,8 +44,8 @@ dependencies {
     implementation("io.quarkus:quarkus-micrometer-registry-prometheus")
 
     implementation("io.quarkus:quarkus-smallrye-openapi")
-
-    compileOnly("org.projectlombok:lombok:${property("lombokVersion")}")
+	
+	compileOnly("org.projectlombok:lombok:${property("lombokVersion")}")
     annotationProcessor("org.projectlombok:lombok:${property("lombokVersion")}")
     testCompileOnly("org.projectlombok:lombok:${property("lombokVersion")}")
     testAnnotationProcessor("org.projectlombok:lombok:${property("lombokVersion")}")
@@ -60,24 +54,18 @@ dependencies {
     annotationProcessor("org.mapstruct:mapstruct-processor:${property("mapstructVersion")}")
     testAnnotationProcessor("org.mapstruct:mapstruct-processor:${property("mapstructVersion")}")
 
-    // --- Testes ---
     testImplementation("io.quarkus:quarkus-junit5")
     testImplementation("io.rest-assured:rest-assured")
-    testImplementation("org.assertj:assertj-core:3.26.0")
-
-    testImplementation(enforcedPlatform(
-        "${property("quarkusPlatformGroupId")}:${property("quarkusPlatformArtifactId")}:${property("quarkusPlatformVersion")}"
-    ))
-
+	testImplementation("org.assertj:assertj-core:3.27.6")
+	testImplementation(enforcedPlatform("${property("quarkusPlatformGroupId")}:${property("quarkusPlatformArtifactId")}:${property("quarkusPlatformVersion")}"))
 }
 
-tasks.withType<Test>().configureEach {
-    useJUnitPlatform()
-    systemProperty("java.util.logging.manager", "org.jboss.logmanager.LogManager")
-    testLogging {
-        events("PASSED", "FAILED", "SKIPPED")
-        showStandardStreams = true
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(25))
     }
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
 
 tasks.jar {
@@ -85,9 +73,19 @@ tasks.jar {
     archiveVersion.set("")
 }
 
-tasks.withType<JavaCompile>().configureEach {
+tasks.withType<Test>().configureEach {
+	useJUnitPlatform()
+    systemProperty("java.util.logging.manager", "org.jboss.logmanager.LogManager")
+    jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
+	testLogging {
+        events("PASSED", "FAILED", "SKIPPED")
+        showStandardStreams = true
+    }
+}
+
+tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
-    options.compilerArgs.add("-Amapstruct.defaultComponentModel=jakarta-cdi")
+	options.compilerArgs.add("-Amapstruct.defaultComponentModel=jakarta-cdi")
     options.compilerArgs.add("-parameters")
 }
 

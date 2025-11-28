@@ -18,7 +18,7 @@ public record DayOpeningRecord(
         @NotBlank(message = "Start time is required")
         String startTime,
 
-        @ValidTime(message = "Start time must be in format HH:mm")
+        @ValidTime(message = "End time must be in format HH:mm")
         @NotBlank(message = "End time is required")
         String endTime,
 
