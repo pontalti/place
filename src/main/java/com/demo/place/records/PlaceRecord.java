@@ -16,9 +16,8 @@ public record PlaceRecord(
         @NotBlank(message = "Location is mandatory")
         String location,
 
-        @Valid
         @NotNull(message = "OpeningHours is mandatory")
-        List<DayOpeningRecord> days
+        List<@Valid DayOpeningRecord> days
 
 ) {
 

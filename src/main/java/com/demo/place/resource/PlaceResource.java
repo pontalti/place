@@ -57,7 +57,7 @@ public class PlaceResource {
 							description = "List of PlaceRecord objects to create", 
 							content = @Content(mediaType = MediaType.APPLICATION_JSON, 
 							schema = @Schema(implementation = PlaceRecord[].class))) 
-			@Valid @Size(min = 1, message = "Provide at least one location.") List<PlaceRecord> places) {
+			@Size(min = 1, message = "Provide at least one location.") List<@Valid PlaceRecord> places) {
 		List<PlaceRecord> savedPlaces = placeService.savePlace(places);
 		return Response.status(Response.Status.CREATED).entity(savedPlaces).build();
 	}
