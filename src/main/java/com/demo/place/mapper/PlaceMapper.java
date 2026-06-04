@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
@@ -26,11 +27,13 @@ public interface PlaceMapper {
     
     List<Place> toEntity(List<PlaceRecord> recordList);
 
+    @Mapping(target = "place", ignore = true)
     DayOpening toEntity(DayOpeningRecord record);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromPatch(PlacePatchRecord patch, @MappingTarget Place entity);
 
+    @Mapping(target = "place", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateDayFromPatch(DayOpeningRecord src, @MappingTarget DayOpening tgt);
 

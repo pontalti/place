@@ -72,7 +72,8 @@ tasks.bootJar {
 // Force MapStruct to generate Spring components (@Mapper(componentModel = "spring"))
 tasks.withType<JavaCompile>().configureEach {
 	options.encoding = "UTF-8"
-    options.compilerArgs.add("-Amapstruct.defaultComponentModel=spring")
+	options.compilerArgs.add("-Amapstruct.defaultComponentModel=spring")
+	options.compilerArgs.add("-Xlint:deprecation")
 }
 
 /**

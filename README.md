@@ -68,13 +68,13 @@ java -jar build/libs/place.jar
 Build the container image(s):
 
 ```bash
-docker-compose build
+docker compose build
 ```
 
 Start the containers in detached mode:
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 Follow the application logs:

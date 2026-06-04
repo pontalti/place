@@ -10,10 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.lang.Nullable;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -25,21 +25,20 @@ public class ExceptionHelper extends ResponseEntityExceptionHandler {
         super();
     }
 
-    @Override
-    @Nullable
-    protected ResponseEntity<Object> handleExceptionInternal(Exception ex,
-                                                             @Nullable Object body,
-                                                             HttpHeaders headers,
-                                                             HttpStatusCode statusCode,
-                                                             WebRequest request) {
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
+        List<String> details = List.of(
+                          ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : "Unexpected error"
+                                    );
 
-        List<String> details = List.of(ex.getLocalizedMessage());
         ErrorResponse error = new ErrorResponse("Internal Server Error", details);
-        return new ResponseEntity<>(error, statusCode);
+
+        return ResponseEntity
+                            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body(error);
     }
 
     @Override
-    @Nullable
     protected ResponseEntity<Object> handleHandlerMethodValidationException(
             HandlerMethodValidationException ex,
             HttpHeaders headers,
@@ -68,9 +67,9 @@ public class ExceptionHelper extends ResponseEntityExceptionHandler {
                 errorDetails.put("invalidValue", "null");
             }
 
-            String message = error.getDefaultMessage() != null
-                    ? error.getDefaultMessage()
-                    : error.toString();
+            String message = ex.getMostSpecificCause() != null
+                    ? ex.getMostSpecificCause().getMessage()
+                    : ex.getMessage();
 
             errorDetails.put("message", message);
             validationErrors.add(errorDetails);
@@ -78,11 +77,13 @@ public class ExceptionHelper extends ResponseEntityExceptionHandler {
 
         ErrorResponse error = new ErrorResponse("Validation Failed", validationErrors);
 
-        return handleExceptionInternal(ex, error, headers, HttpStatus.BAD_REQUEST, request);
+        return ResponseEntity
+                            .status(HttpStatus.BAD_REQUEST)
+                            .headers(headers)
+                            .body(error);
     }
 
     @Override
-    @Nullable
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
                                                                   HttpHeaders headers,
                                                                   HttpStatusCode status,
@@ -90,6 +91,9 @@ public class ExceptionHelper extends ResponseEntityExceptionHandler {
 
         List<String> details = List.of(ex.getMostSpecificCause().getMessage());
         ErrorResponse error = new ErrorResponse("Malformed JSON or unreadable request", details);
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+        return ResponseEntity
+                            .status(HttpStatus.BAD_REQUEST)
+                            .headers(headers)
+                            .body(error);
     }
 }
