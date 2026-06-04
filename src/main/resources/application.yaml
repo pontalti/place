@@ -4,6 +4,9 @@ api:
 quarkus:
   http:
     root-path: /api/${api.version}
+    non-application-root-path: /q
+  swagger-ui:
+    always-include: true
   package:
     jar:
       enabled: true
