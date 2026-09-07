@@ -24,7 +24,7 @@ import java.util.List;
 
 @Tag(name = "Place", description = "Endpoints to manage places and fetch grouped opening hours")
 @RestController
-@RequestMapping(path = "/place")
+@RequestMapping(path = "/api/place")
 @RequiredArgsConstructor
 public class PlaceController {
 

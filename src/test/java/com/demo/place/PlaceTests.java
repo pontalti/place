@@ -34,6 +34,8 @@ import tools.jackson.databind.node.ObjectNode;
 @SpringBootTest(webEnvironment = WebEnvironment.MOCK, classes = PlaceApplication.class)
 @AutoConfigureMockMvc
 public class PlaceTests {
+	
+	private static final String BASE = "/api/place";
 
 	@Autowired
 	private JsonMapper objectMapper;
@@ -50,7 +52,7 @@ public class PlaceTests {
     @Test
     @DisplayName("Test getAllplace endpoint")
     public void getAllplace() throws Exception {
-        this.mockMvc.perform(get("/place"))
+        this.mockMvc.perform(get(BASE))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
@@ -58,7 +60,7 @@ public class PlaceTests {
     @Test
     @DisplayName("Test getPlaceById endpoint")
     public void getPlaceById() throws Exception {
-        this.mockMvc.perform(get("/place/1"))
+        this.mockMvc.perform(get(BASE+"/1"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
@@ -66,7 +68,7 @@ public class PlaceTests {
     @Test
     @DisplayName("Test deleteById endpoint")
     public void deleteById() throws Exception {
-        this.mockMvc.perform(delete("/place/2"))
+        this.mockMvc.perform(delete(BASE+"/2"))
                 .andExpect(status().isOk());
     }
 
@@ -75,7 +77,7 @@ public class PlaceTests {
     public void createPlace() throws Exception {
         var json = readJsonFile("place.json");
 
-        this.mockMvc.perform(post("/place")
+        this.mockMvc.perform(post(BASE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isOk())
@@ -87,7 +89,7 @@ public class PlaceTests {
     public void createPlaceBadRequest() throws Exception {
         var json = readJsonFile("place_bad_request.json");
 
-        this.mockMvc.perform(post("/place")
+        this.mockMvc.perform(post(BASE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isBadRequest())
@@ -99,7 +101,7 @@ public class PlaceTests {
     public void createPlaceMalformed() throws Exception {
         var json = readJsonFile("place_malformed.json");
 
-        this.mockMvc.perform(post("/place")
+        this.mockMvc.perform(post(BASE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isBadRequest())
@@ -112,7 +114,7 @@ public class PlaceTests {
     public void createPlaceWrongTime(String fileName) throws Exception {
         var json = readJsonFile(fileName);
 
-        this.mockMvc.perform(post("/place")
+        this.mockMvc.perform(post(BASE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isBadRequest())
@@ -122,7 +124,7 @@ public class PlaceTests {
     @Test
     @DisplayName("Test groupedOpeningHoursStructure endpoint")
     public void groupedOpeningHoursStructure() throws Exception {
-        var response = mockMvc.perform(get("/place/1/opening-hours/grouped")
+        var response = mockMvc.perform(get(BASE+"/1/opening-hours/grouped")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.label").isNotEmpty())
@@ -149,7 +151,7 @@ public class PlaceTests {
     @CsvSource({"place.json,place_update.json"})
     public void updatePlace(String createFileName, String updateFileName) throws Exception {
         var createdJson = readJsonFile(createFileName);
-        var postResult = mockMvc.perform(post("/place")
+        var postResult = mockMvc.perform(post(BASE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(createdJson))
                 .andExpect(status().isOk())
@@ -169,7 +171,7 @@ public class PlaceTests {
         updateNode.put("id", createdId);
         var updatedJson = this.objectMapper.writeValueAsString(updateNode);
 
-        this.mockMvc.perform(put("/place")
+        this.mockMvc.perform(put(BASE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updatedJson))
                 .andExpect(status().isOk())
@@ -184,7 +186,7 @@ public class PlaceTests {
     @CsvSource({"place.json,place_partial_update.json"})
     public void partialUpdatePlace(String createFileName, String partialUpdateFileName) throws Exception {
         var createdJson = readJsonFile(createFileName);
-        var postResult = mockMvc.perform(post("/place")
+        var postResult = mockMvc.perform(post(BASE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(createdJson))
                 .andExpect(status().isOk())
@@ -204,7 +206,7 @@ public class PlaceTests {
         updateNode.put("id", createdId);
         var updatedJson = this.objectMapper.writeValueAsString(updateNode);
 
-        this.mockMvc.perform(patch("/place")
+        this.mockMvc.perform(patch(BASE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updatedJson))
                 .andExpect(status().isOk())

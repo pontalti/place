@@ -30,7 +30,6 @@ public class ExceptionHelper extends ResponseEntityExceptionHandler {
         List<String> details = List.of(
                           ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : "Unexpected error"
                                     );
-
         ErrorResponse error = new ErrorResponse("Internal Server Error", details);
 
         return ResponseEntity

@@ -55,8 +55,13 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-aspectj-test")
 }
 
+tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {
+    systemProperty("spring.profiles.active", (project.findProperty("profile") ?: "dev") as String)
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
+    systemProperty("spring.profiles.active", "test")
 }
 
 // Produce plain artifact names
