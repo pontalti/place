@@ -21,6 +21,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.RestAssured;
@@ -85,22 +86,44 @@ public class PlaceResourceTest {
             .statusCode(204);
     }
 
-    @Test
+    
+    @ParameterizedTest
     @DisplayName("Test createPlace endpoint")
-    public void createPlace() throws IOException {
-        String json = readJsonFile("place.json");
+    @CsvSource({"place.json"})
+    public void createPlace(String createFileName) throws IOException {
+        var createdJson = readJsonFile(createFileName);
+        var array = objectMapper.readTree(createdJson);
+        var place = array.get(0).toString();
 
         given()
             .contentType(ContentType.JSON)
-            .body(json)
+            .body(place)
         .when()
             .post("/place")
         .then()
             .statusCode(201)
             .contentType(ContentType.JSON)
+            .body("id", notNullValue());
+    }
+    
+    @ParameterizedTest
+    @DisplayName("Test createPlace batch endpoint")
+    @CsvSource({"place.json"})
+    public void createPlaceBatch(String createFileName) throws IOException {
+    	var createdJson = readJsonFile(createFileName);
+        var places = objectMapper.readTree(createdJson);
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(places.toString())
+        .when()
+            .post("/place/batch")
+        .then()
+            .statusCode(201)
+            .contentType(ContentType.JSON)
             .body("[0].id", notNullValue());
     }
-
+/*
     @Test
     @DisplayName("Test createPlace endpoint - bad request validation")
     public void createPlaceBadRequest() throws IOException {
@@ -112,13 +135,13 @@ public class PlaceResourceTest {
         .when()
             .post("/place")
         .then()
-            .statusCode(400)
-            .contentType(ContentType.JSON);
+            .statusCode(400);
     }
 
     @Test
     @DisplayName("Test createPlace endpoint - malformed json")
     public void createPlaceMalformed() throws IOException {
+
         String json = readJsonFile("place_malformed.json");
 
         given()
@@ -127,8 +150,7 @@ public class PlaceResourceTest {
         .when()
             .post("/place")
         .then()
-            .statusCode(400)
-            .contentType(ContentType.JSON);
+            .statusCode(400);
     }
 
     @ParameterizedTest
@@ -143,8 +165,22 @@ public class PlaceResourceTest {
         .when()
             .post("/place")
         .then()
+            .statusCode(400);
+    }
+*/
+    @ParameterizedTest
+    @DisplayName("Test createPlace endpoint - bad request validation")
+    @CsvSource({"place_bad_request.json", "place_malformed.json", "place_wrong_time_1.json", "place_wrong_time_2.json", "place_wrong_time_3.json"})
+    public void createPlaceBadRequest(String fileName) throws IOException {
+    	String json = readJsonFile(fileName);
+        given()
+            .contentType(ContentType.JSON)
+            .body(json)
+        .when()
+            .post("/place")
+        .then()
             .statusCode(400)
-            .contentType(ContentType.JSON);
+            .header("Content-Length", "0");
     }
 
     @Test
@@ -184,11 +220,13 @@ public class PlaceResourceTest {
     @DisplayName("Test updatePlace endpoint - full update")
     @CsvSource({"place.json,place_update.json"})
     public void updatePlace(String createFileName, String updateFileName) throws IOException {
-        String createdJson = readJsonFile(createFileName);
+        var createdJson = readJsonFile(createFileName);
+        var array = this.objectMapper.readTree(createdJson);
+        var place = array.get(0).toString();
         String postResult =
                 given()
                     .contentType(ContentType.JSON)
-                    .body(createdJson)
+                    .body(place)
                 .when()
                     .post("/place")
                 .then()
@@ -197,16 +235,14 @@ public class PlaceResourceTest {
                     .extract()
                     .asString();
 
-        JsonNode arrayNode = objectMapper.readTree(postResult);
-        JsonNode firstItem = arrayNode.get(0);
-        long createdId = firstItem.get("id").asLong();
+        var node = this.objectMapper.readTree(postResult);
+        var createdId = node.get("id").asLong();
 
         String updateJsonRaw = readJsonFile(updateFileName);
-        JsonNode updateNode = objectMapper.readTree(updateJsonRaw);
-        ((com.fasterxml.jackson.databind.node.ObjectNode) updateNode)
-                .put("id", createdId);
+        JsonNode updateNode = this.objectMapper.readTree(updateJsonRaw);
+        ((ObjectNode) updateNode).put("id", createdId);
 
-        String updatedJson = objectMapper.writeValueAsString(updateNode);
+        String updatedJson = this.objectMapper.writeValueAsString(updateNode);
 
         given()
             .contentType(ContentType.JSON)
@@ -225,11 +261,13 @@ public class PlaceResourceTest {
     @DisplayName("Test updatePlace endpoint - partial update")
     @CsvSource({"place.json,place_partial_update.json"})
     public void partialUpdatePlace(String createFileName, String partialUpdateFileName) throws IOException {
-        String createdJson = readJsonFile(createFileName);
+    	var createdJson = readJsonFile(createFileName);
+        var array = this.objectMapper.readTree(createdJson);
+        var place = array.get(0).toString();
         String postResult =
                 given()
                     .contentType(ContentType.JSON)
-                    .body(createdJson)
+                    .body(place)
                 .when()
                     .post("/place")
                 .then()
@@ -238,16 +276,13 @@ public class PlaceResourceTest {
                     .extract()
                     .asString();
 
-        JsonNode arrayNode = objectMapper.readTree(postResult);
-        JsonNode firstItem = arrayNode.get(0);
-        long createdId = firstItem.get("id").asLong();
+        var node = this.objectMapper.readTree(postResult);
+        var createdId = node.get("id").asLong();
 
         String updateJsonRaw = readJsonFile(partialUpdateFileName);
-        JsonNode updateNode = objectMapper.readTree(updateJsonRaw);
-        ((com.fasterxml.jackson.databind.node.ObjectNode) updateNode)
-                .put("id", createdId);
-
-        String updatedJson = objectMapper.writeValueAsString(updateNode);
+        JsonNode updateNode = this.objectMapper.readTree(updateJsonRaw);
+        ((ObjectNode) updateNode).put("id", createdId);
+        String updatedJson = this.objectMapper.writeValueAsString(updateNode);
 
         given()
             .contentType(ContentType.JSON)

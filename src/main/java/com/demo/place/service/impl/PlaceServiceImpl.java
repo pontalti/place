@@ -32,8 +32,17 @@ public class PlaceServiceImpl implements PlaceService {
     @Transactional
     public List<PlaceRecord> savePlace(List<PlaceRecord> places) {
     	var placeEntityList = buildEntity(places);
-        repository.persist(placeEntityList);
+        this.repository.persist(placeEntityList);
         return mapper.toRecord(placeEntityList);
+    }
+    
+    @Log
+    @Override
+    @Transactional
+    public PlaceRecord savePlace(PlaceRecord place) {
+    	var placeEntity = buildEntity(place);
+	    this.repository.persist(placeEntity);
+	    return mapper.toRecord(placeEntity);
     }
 
     @Log
@@ -113,6 +122,12 @@ public class PlaceServiceImpl implements PlaceService {
     	}
         return placeEntityList;
     }
+    
+	protected Place buildEntity(PlaceRecord record) {
+		var placeEntity = mapper.toEntity(record);
+		placeEntity.getDays().forEach(d -> d.setPlace(placeEntity));
+		return placeEntity;
+	}
 
     @Log
     @Override

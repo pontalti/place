@@ -19,7 +19,8 @@ import com.demo.place.service.PlaceService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -44,22 +45,42 @@ public class PlaceResource {
 	private final GroupPlaceService groupPlaceService;
 
 	@POST
-	@Path("")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@Operation(summary = "Create multiple places", description = "Saves a list of validated places")
+	@Operation(summary = "Create a place", description = "Saves a validated place with its opening hours")
 	@APIResponses({
-			@APIResponse(responseCode = "201", description = "Place(s) created successfully", 
-							content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PlaceRecord[].class))),
-			@APIResponse(responseCode = "400", description = "Invalid or malformed request", content = @Content) })
+	        @APIResponse(responseCode = "201", description = "Place created successfully",
+	                        content = @Content(mediaType = MediaType.APPLICATION_JSON,
+	                        schema = @Schema(implementation = PlaceRecord.class))),
+	        @APIResponse(responseCode = "400", description = "Invalid or missing payload", content = @Content) })
 	public Response savePlace(
-			@RequestBody(required = true, 
-							description = "List of PlaceRecord objects to create", 
-							content = @Content(mediaType = MediaType.APPLICATION_JSON, 
-							schema = @Schema(implementation = PlaceRecord[].class))) 
-			@Size(min = 1, message = "Provide at least one location.") List<@Valid PlaceRecord> places) {
-		List<PlaceRecord> savedPlaces = placeService.savePlace(places);
-		return Response.status(Response.Status.CREATED).entity(savedPlaces).build();
+	        @RequestBody(required = true,
+	                        description = "Place to be created",
+	                        content = @Content(mediaType = MediaType.APPLICATION_JSON,
+	                        schema = @Schema(implementation = PlaceRecord.class)))
+	        @Valid @NotNull(message = "Place cannot be null") PlaceRecord place) {
+	    PlaceRecord saved = placeService.savePlace(place);
+	    return Response.status(Response.Status.CREATED).entity(saved).build();
+	}
+
+	@POST
+	@Path("/batch")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Operation(summary = "Create multiple places", description = "Saves a list of validated places in a single request")
+	@APIResponses({
+	        @APIResponse(responseCode = "201", description = "Place(s) created successfully",
+	                        content = @Content(mediaType = MediaType.APPLICATION_JSON,
+	                        schema = @Schema(implementation = PlaceRecord[].class))),
+	        @APIResponse(responseCode = "400", description = "Invalid payload or empty list", content = @Content) })
+	public Response savePlaces(
+	        @RequestBody(required = true,
+	                        description = "List of PlaceRecord objects to create",
+	                        content = @Content(mediaType = MediaType.APPLICATION_JSON,
+	                        schema = @Schema(implementation = PlaceRecord[].class)))
+	        @NotEmpty(message = "Provide at least one place.") List<@Valid PlaceRecord> places) {
+	    List<PlaceRecord> savedPlaces = placeService.savePlace(places);
+	    return Response.status(Response.Status.CREATED).entity(savedPlaces).build();
 	}
 
 	@GET
