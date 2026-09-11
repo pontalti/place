@@ -35,10 +35,12 @@ import lombok.RequiredArgsConstructor;
 
 @Tag(name = "Place", description = "Endpoints to manage places and fetch grouped opening hours")
 @RestController
-@RequestMapping(path = "/api/place")
+@RequestMapping(path = "/api/{version}/place")
 @RequiredArgsConstructor
 public class PlaceController {
 
+	private static final String API_VERSION = "v1";
+	
     private final PlaceService placeService;
     private final GroupPlaceService groupPlaceService;
 
@@ -57,7 +59,7 @@ public class PlaceController {
                             content = @Content)
             }
     )
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(version = API_VERSION, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PlaceRecord> savePlace(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Place to be created",
@@ -90,7 +92,7 @@ public class PlaceController {
                             content = @Content)
             }
     )
-    @PostMapping(path = "/batch", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(version = API_VERSION, path = "/batch", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<PlaceRecord>> savePlaces(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "List of PlaceRecord to be created",
@@ -124,7 +126,7 @@ public class PlaceController {
                     @ApiResponse(responseCode = "404", description = "Place not found")
             }
     )
-    @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(version = API_VERSION, path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PlaceRecord> findById(
             @PathVariable("id") @NotNull Long id
     ) {
@@ -145,7 +147,7 @@ public class PlaceController {
                     )
             }
     )
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(version = API_VERSION, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<PlaceRecord>> listAll() {
         var places = this.placeService.listAll();
         return ResponseEntity.ok(places);
@@ -162,7 +164,7 @@ public class PlaceController {
                     )
             )
     )
-    @GetMapping(path = "/{id}/opening-hours/grouped", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(version = API_VERSION, path = "/{id}/opening-hours/grouped", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GroupedPlaceRecord> getGroupedOpeningHoursByPlaceId(
             @PathVariable("id") @NotNull Long id
     ) {
@@ -178,7 +180,7 @@ public class PlaceController {
                     @ApiResponse(responseCode = "404", description = "Place not found")
             }
     )
-    @DeleteMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(version = API_VERSION, path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> deleteById(
             @PathVariable("id") @NotNull Long id
     ) {
@@ -198,7 +200,7 @@ public class PlaceController {
                             content = @Content)
             }
     )
-    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(version = API_VERSION, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PlaceRecord> updatePlace(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "The Place resource with updated data",
@@ -230,7 +232,7 @@ public class PlaceController {
                             content = @Content)
             }
     )
-    @PatchMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(version = API_VERSION, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PlaceRecord> patchPlace(@Valid @RequestBody PlacePatchRecord patch) {
         PlaceRecord updated = this.placeService.patchPlace(patch);
         return ResponseEntity.ok(updated);

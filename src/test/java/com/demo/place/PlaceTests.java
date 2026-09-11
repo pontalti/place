@@ -35,7 +35,8 @@ import tools.jackson.databind.node.ObjectNode;
 @AutoConfigureMockMvc
 public class PlaceTests {
 	
-	private static final String BASE = "/api/place";
+	private static final String API_VERSION = "v1";
+	private static final String BASE = "/api/"+API_VERSION+"/place";
 
 	@Autowired
 	private JsonMapper objectMapper;
