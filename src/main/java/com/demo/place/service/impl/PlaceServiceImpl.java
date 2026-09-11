@@ -34,6 +34,14 @@ public class PlaceServiceImpl implements PlaceService {
 
     @Log
     @Override
+    public PlaceRecord savePlace(PlaceRecord place) {
+    	var placeEntity = buildEntity(place);
+	    this.repository.save(placeEntity);
+	    return mapper.toRecord(placeEntity);
+    }
+    
+    @Log
+    @Override
     public List<PlaceRecord> savePlace(List<PlaceRecord> places) {
     	var placeEntityList = buildEntity(places);
 	    repository.saveAll(placeEntityList);
@@ -96,6 +104,12 @@ public class PlaceServiceImpl implements PlaceService {
 			place.getDays().forEach(d -> d.setPlace(place));
 		}
 		return placeEntityList;
+	}
+	
+	protected Place buildEntity(PlaceRecord record) {
+		var placeEntity = mapper.toEntity(record);
+		placeEntity.getDays().forEach(d -> d.setPlace(placeEntity));
+		return placeEntity;
 	}
 
     @Log

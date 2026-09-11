@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface PlaceService {
 
+	public PlaceRecord savePlace(PlaceRecord places);
+	
     public List<PlaceRecord> savePlace(List<PlaceRecord> places);
 
     public List<PlaceRecord> listAll();

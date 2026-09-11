@@ -1,10 +1,26 @@
 package com.demo.place.controller;
 
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.demo.place.records.GroupedPlaceRecord;
 import com.demo.place.records.PlacePatchRecord;
 import com.demo.place.records.PlaceRecord;
 import com.demo.place.service.GroupPlaceService;
 import com.demo.place.service.PlaceService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -13,14 +29,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Tag(name = "Place", description = "Endpoints to manage places and fetch grouped opening hours")
 @RestController
@@ -32,21 +43,55 @@ public class PlaceController {
     private final GroupPlaceService groupPlaceService;
 
     @Operation(
-            summary = "Create multiple places",
-            description = "Saves a list of validated places",
+            summary = "Create a place",
+            description = "Saves a validated place with its opening hours",
             responses = {
                     @ApiResponse(
-                            responseCode = "200", description = "Place(s) created successfully",
+                            responseCode = "201", description = "Place created successfully",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = PlaceRecord.class)
+                            )
+                    ),
+                    @ApiResponse(responseCode = "400", description = "Invalid or missing payload",
+                            content = @Content)
+            }
+    )
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<PlaceRecord> savePlace(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Place to be created",
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = PlaceRecord.class)
+                    )
+            )
+            @RequestBody
+            @Valid @NotNull(message = "Place cannot be null")
+            PlaceRecord place
+    ) {
+        var saved = this.placeService.savePlace(place);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    }
+
+    @Operation(
+            summary = "Create multiple places",
+            description = "Saves a list of validated places in a single request",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "201", description = "Place(s) created successfully",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     array = @ArraySchema(schema = @Schema(implementation = PlaceRecord.class))
                             )
                     ),
-                    @ApiResponse(responseCode = "400", description = "Invalid payload or empty list")
+                    @ApiResponse(responseCode = "400", description = "Invalid payload or empty list",
+                            content = @Content)
             }
     )
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PlaceRecord>> savePlace(
+    @PostMapping(path = "/batch", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<PlaceRecord>> savePlaces(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "List of PlaceRecord to be created",
                     required = true,
@@ -56,21 +101,11 @@ public class PlaceController {
                     )
             )
             @RequestBody
-            @Valid @Size(min = 1, message = "Provide at least one location.")
+            @Valid @NotEmpty(message = "Provide at least one place.")
             List<PlaceRecord> places
     ) {
         var saved = this.placeService.savePlace(places);
-        return ResponseEntity.ok(saved);
-    }
-
-    @Operation(
-            summary = "List all places",
-            responses = @ApiResponse(responseCode = "200", description = "Returns list of places")
-    )
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PlaceRecord>> listAll() {
-        var list = this.placeService.listAll();
-        return ResponseEntity.ok(list);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @Operation(
@@ -95,6 +130,25 @@ public class PlaceController {
     ) {
         var place = this.placeService.findById(id);
         return ResponseEntity.ok(place);
+    }
+    
+    @Operation(
+            summary = "List all places",
+            description = "Returns every place with its opening hours",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200", description = "List of places (empty if none exist)",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    array = @ArraySchema(schema = @Schema(implementation = PlaceRecord.class))
+                            )
+                    )
+            }
+    )
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<PlaceRecord>> listAll() {
+        var places = this.placeService.listAll();
+        return ResponseEntity.ok(places);
     }
 
     @Operation(

@@ -72,15 +72,30 @@ public class PlaceTests {
                 .andExpect(status().isOk());
     }
 
-    @Test
-    @DisplayName("Test createPlace endpoint")
-    public void createPlace() throws Exception {
-        var json = readJsonFile("place.json");
+    @ParameterizedTest
+    @DisplayName("Test createPlace batch endpoint")
+    @CsvSource({"place.json"})
+    public void createPlaceBatch(String createFileName) throws Exception {
+    	var createdJson = readJsonFile(createFileName);
+        var places = objectMapper.readTree(createdJson);
+        this.mockMvc.perform(post(BASE+"/batch")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(places.toString()))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    }
 
+    @ParameterizedTest
+    @DisplayName("Test createPlace endpoint")
+    @CsvSource({"place.json"})
+    public void createPlace(String createFileName) throws Exception {
+        var createdJson = readJsonFile(createFileName);
+        var array = objectMapper.readTree(createdJson);
+        var place = array.get(0).toString();
         this.mockMvc.perform(post(BASE)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
-                .andExpect(status().isOk())
+                        .content(place))
+                .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 
@@ -151,19 +166,20 @@ public class PlaceTests {
     @CsvSource({"place.json,place_update.json"})
     public void updatePlace(String createFileName, String updateFileName) throws Exception {
         var createdJson = readJsonFile(createFileName);
+        var array = objectMapper.readTree(createdJson);
+        var place = array.get(0).toString();
         var postResult = mockMvc.perform(post(BASE)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(createdJson))
-                .andExpect(status().isOk())
+                        .content(place))
+                .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        var arrayNode = this.objectMapper.readTree(postResult);
+        var node = this.objectMapper.readTree(postResult);
 
-        var firstItem = arrayNode.get(0);
-        var createdId = firstItem.get("id").asLong();
+        var createdId = node.get("id").asLong();
 
         var updateJsonRaw = readJsonFile(updateFileName);
         var updateNode = (ObjectNode) this.objectMapper.readTree(updateJsonRaw);
@@ -185,20 +201,21 @@ public class PlaceTests {
     @DisplayName("Test updatePlace endpoint - full update")
     @CsvSource({"place.json,place_partial_update.json"})
     public void partialUpdatePlace(String createFileName, String partialUpdateFileName) throws Exception {
-        var createdJson = readJsonFile(createFileName);
+    	var createdJson = readJsonFile(createFileName);
+        var array = objectMapper.readTree(createdJson);
+        var place = array.get(0).toString();
         var postResult = mockMvc.perform(post(BASE)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(createdJson))
-                .andExpect(status().isOk())
+                        .content(place))
+                .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        var arrayNode = this.objectMapper.readTree(postResult);
+        var node = this.objectMapper.readTree(postResult);
 
-        var firstItem = arrayNode.get(0);
-        var createdId = firstItem.get("id").asLong();
+        var createdId = node.get("id").asLong();
 
         var updateJsonRaw = readJsonFile(partialUpdateFileName);
         var updateNode = (ObjectNode) this.objectMapper.readTree(updateJsonRaw);
