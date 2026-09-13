@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.Hibernate;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -18,6 +18,7 @@ import jakarta.persistence.NamedAttributeNode;
 import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -53,6 +54,9 @@ public class Place {
     private String label;
     private String location;
 
+    // The setter below is hand-written; Lombok skips generating one when a
+    // method with the same signature already exists.
+    @Setter(AccessLevel.NONE)
     @OneToMany(
             mappedBy = "place",
             cascade = CascadeType.ALL,
@@ -62,8 +66,23 @@ public class Place {
     @Builder.Default
     private List<DayOpening> days = new ArrayList<>();
 
-    /** Keeps both sides of the association in sync. */
-    public void replaceDays(List<DayOpening> newDays) {
+    /**
+     * Replaces the opening hours of this place.
+     *
+     * <p>This is deliberately not a plain setter. It mutates the managed
+     * collection instead of replacing the reference, so {@code orphanRemoval}
+     * still sees which rows were taken out, and it sets the back-reference on
+     * every slot, because {@code mappedBy = "place"} makes the child the owner
+     * of the association — without it the {@code place_id} column would be
+     * written as null.
+     *
+     * <p>Do not let Lombok generate this one: {@code @Setter(AccessLevel.NONE)}
+     * on the field is what keeps the generated version away.
+     *
+     * @param newDays the slots to keep; {@code null} or an empty list clears
+     *                the collection, which deletes the existing rows
+     */
+    public void setDays(List<DayOpening> newDays) {
         this.days.clear();
         if (newDays != null) {
             newDays.forEach(day -> {

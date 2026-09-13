@@ -3,9 +3,9 @@ package com.demo.place.entity;
 import java.time.DayOfWeek;
 import java.util.Objects;
 
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.Hibernate;
 
 import com.demo.place.entity.Deserializer.DayOfWeekDeserializer;
 import com.demo.place.entity.Serializer.DayOfWeekSerializer;
@@ -22,6 +22,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,9 +33,11 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * The back-reference to {@code Place} is excluded from both toString and JSON:
- * Place -> days -> place -> days would recurse until the stack runs out.
- * @JsonIgnore covers serialisation, @ToString(exclude) covers logging.
+ * The back-reference to {@code Place} is kept out of both toString and JSON:
+ * Place to days to place to days would recurse until the stack runs out.
+ * {@code @JsonIgnore} covers serialisation, {@code @ToString(exclude)} covers
+ * logging — and the latter also avoids initialising the lazy proxy when the
+ * LogAspect prints a method argument outside a transaction.
  */
 @Getter
 @Setter
@@ -45,6 +49,10 @@ import lombok.ToString;
 @Table
 @DynamicInsert
 @DynamicUpdate
+@NamedEntityGraph(
+        name = "DayOpening.place",
+        attributeNodes = @NamedAttributeNode("place")
+)
 public class DayOpening {
 
     @Id
