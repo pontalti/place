@@ -24,6 +24,10 @@ import java.time.DayOfWeek;
 @Table
 @DynamicInsert
 @DynamicUpdate
+@NamedEntityGraph(
+        name = "DayOpening.place",
+        attributeNodes = @NamedAttributeNode("place")
+)
 public class DayOpening {
 
     @Id
@@ -36,7 +40,7 @@ public class DayOpening {
     @Column(name = "day_of_week", nullable = false)
     private DayOfWeek dayOfWeek;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "place_id", nullable = false)
     private Place place;
 

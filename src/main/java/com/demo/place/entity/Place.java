@@ -18,6 +18,10 @@ import java.util.List;
 @Table
 @DynamicInsert
 @DynamicUpdate
+@NamedEntityGraph(
+        name = "Place.withDays",
+        attributeNodes = @NamedAttributeNode("days")
+)
 public class Place {
 
     @Id
@@ -27,11 +31,10 @@ public class Place {
     private String label;
     private String location;
 
-    @OneToMany(
-            mappedBy = "place",
+    @OneToMany(mappedBy = "place",
             cascade = CascadeType.ALL,
             orphanRemoval = true,
-            fetch = FetchType.EAGER
+            fetch = FetchType.LAZY
     )
     private List<DayOpening> days;
 

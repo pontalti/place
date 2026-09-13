@@ -28,6 +28,7 @@ spring:
     driver-class-name: org.h2.Driver
 
   jpa:
+    open-in-view: false
     show-sql: true
     hibernate:
       ddl-auto: validate
