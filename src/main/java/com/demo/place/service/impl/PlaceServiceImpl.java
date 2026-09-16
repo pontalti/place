@@ -7,8 +7,12 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.demo.place.annotation.Log;
@@ -19,7 +23,6 @@ import com.demo.place.records.PlaceRecord;
 import com.demo.place.repository.PlaceRepository;
 import com.demo.place.service.PlaceService;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -151,6 +154,23 @@ public class PlaceServiceImpl implements PlaceService {
             });
         }
         return mapper.toRecord(repository.save(place));
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PlaceRecord> listAll(Pageable pageable) {
+        Page<Long> ids = this.repository.findPlaceIds(pageable);
+
+        if (ids.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        List<Place> places = this.repository.findAllByIdIn(ids.getContent(), pageable.getSort());
+
+        return new PageImpl<>(
+                places.stream().map(this.mapper::toRecord).toList(),
+                pageable,
+                ids.getTotalElements());
     }
 
 }

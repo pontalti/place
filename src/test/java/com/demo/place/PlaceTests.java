@@ -31,6 +31,13 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ObjectNode;
 
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+
 @SpringBootTest(webEnvironment = WebEnvironment.MOCK, classes = PlaceApplication.class)
 @AutoConfigureMockMvc
 public class PlaceTests {
@@ -233,5 +240,107 @@ public class PlaceTests {
                 .andExpect(jsonPath("$.label").value("Stadio Giuseppe Meazza -> Patch"))
                 .andExpect(jsonPath("$.days").isArray())
                 .andExpect(jsonPath("$.days", hasSize(7)));
+    }
+    
+    @Test
+    @DisplayName("Test listPaged endpoint - default page")
+    public void listPagedDefaults() throws Exception {
+        this.mockMvc.perform(get(BASE).param("page", "0"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.number").value(0))
+                .andExpect(jsonPath("$.size").value(20))
+                .andExpect(jsonPath("$.totalElements").isNumber());
+    }
+
+    @Test
+    @DisplayName("Test listPaged endpoint - honours the size parameter")
+    public void listPagedRespectsSize() throws Exception {
+        this.mockMvc.perform(get(BASE)
+                        .param("page", "0")
+                        .param("size", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size").value(1))
+                .andExpect(jsonPath("$.content", hasSize(lessThanOrEqualTo(1))));
+    }
+
+    @Test
+    @DisplayName("Test listPaged endpoint - sorting is applied across the whole table, not per page")
+    public void listPagedSortsByLabel() throws Exception {
+        var ascending = pageContent(get(BASE)
+                .param("page", "0")
+                .param("size", "50")
+                .param("sort", "label,asc"));
+
+        var descending = pageContent(get(BASE)
+                .param("page", "0")
+                .param("size", "50")
+                .param("sort", "label,desc"));
+
+        // Skipped when the fixture has a single row: with one element both
+        // directions look identical and the assertion would prove nothing.
+        if (ascending.size() < 2) {
+            return;
+        }
+
+        var labelsAsc = labelsOf(ascending);
+        assertThat(labelsAsc).isSorted();
+        assertThat(labelsOf(descending)).containsExactlyElementsOf(labelsAsc.reversed());
+    }
+
+    @Test
+    @DisplayName("Test listPaged endpoint - page beyond the last one returns 200 with empty content")
+    public void listPagedOutOfRange() throws Exception {
+        this.mockMvc.perform(get(BASE)
+                        .param("page", "9999")
+                        .param("size", "20"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content", hasSize(0)));
+    }
+
+    @Test
+    @DisplayName("Test listPaged endpoint - the days of each place come back with the record")
+    public void listPagedIncludesDays() throws Exception {
+        var content = pageContent(get(BASE).param("page", "0").param("size", "5"));
+        /*
+        Guards against the N+1 fix regressing into a LazyInitializationException:
+        the collection is fetched by the entity graph, and a missing or null
+        "days" here means the mapping ran outside the transaction.
+        */
+        for (JsonNode place : content) {
+            assertThat(place.get("days")).isNotNull();
+            assertThat(place.get("days").isArray()).isTrue();
+        }
+    }
+
+    @Test
+    @DisplayName("Test listPaged endpoint - without the page parameter the unpaginated listing answers")
+    public void listAllStillReturnsAnArray() throws Exception {
+        /*
+    	The two handlers share the same path; `params = "page"` is the only
+        thing routing between them, so this asserts the fallback still works.
+        */
+        this.mockMvc.perform(get(BASE))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+
+    /** Runs the request and returns the {@code content} node of the page envelope. */
+    private JsonNode pageContent(MockHttpServletRequestBuilder request) throws Exception {
+        var response = this.mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        return this.objectMapper.readTree(response).get("content");
+    }
+
+    private List<String> labelsOf(JsonNode content) {
+        var labels = new ArrayList<String>();
+        content.forEach(place -> labels.add(place.get("label").asString()));
+        return labels;
     }
 }

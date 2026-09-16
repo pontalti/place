@@ -2,6 +2,9 @@ package com.demo.place.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -236,5 +239,48 @@ public class PlaceController {
     public ResponseEntity<PlaceRecord> patchPlace(@Valid @RequestBody PlacePatchRecord patch) {
         PlaceRecord updated = this.placeService.patchPlace(patch);
         return ResponseEntity.ok(updated);
+    }
+    
+    @Operation(
+            summary = "List places with pagination",
+            description = """
+                    Returns a page of places with their opening hours.
+
+                    **Activation:**
+                    • This handler is selected only when the `page` query parameter is present;
+                      without it the request falls through to the unpaginated listing.
+
+                    **Query Parameters:**
+                    1. `page` — zero-based page index (**required** to reach this endpoint).
+                    2. `size` — number of records per page; defaults to `20`.
+                    3. `sort` — `property,(asc|desc)`; defaults to `label,asc`. May be repeated
+                       to sort by more than one property.
+
+                    **Response Shape:**
+                    • The payload is a Spring Data page envelope: the records are under
+                      `content`, alongside `totalElements`, `totalPages`, `number` and `size`.
+                    • A page index beyond the last one returns `200` with an empty `content`
+                      array, not `404`.
+                    """,
+            parameters = {
+                    @Parameter(name = "page", description = "Zero-based page index",
+                            example = "0", required = true),
+                    @Parameter(name = "size", description = "Records per page",
+                            example = "20"),
+                    @Parameter(name = "sort", description = "Sort criteria: property,(asc|desc)",
+                            example = "label,asc")
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Page of places (empty content if the index is out of range)",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = PlaceRecord.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid paging or sorting parameters",
+                            content = @Content)
+            }
+    )
+    @GetMapping(params = "page", version = API_VERSION, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Page<PlaceRecord>> listPaged(@PageableDefault(size = 20, sort = "label") Pageable pageable) {
+    	Page<PlaceRecord> result =  this.placeService.listAll(pageable);
+        return ResponseEntity.ok(result);
     }
 }

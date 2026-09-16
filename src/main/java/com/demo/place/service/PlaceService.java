@@ -1,9 +1,12 @@
 package com.demo.place.service;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.demo.place.records.PlacePatchRecord;
 import com.demo.place.records.PlaceRecord;
-
-import java.util.List;
 
 public interface PlaceService {
 
@@ -20,5 +23,7 @@ public interface PlaceService {
     public PlaceRecord updatePlace(PlaceRecord updatedPlace);
 
     public PlaceRecord patchPlace(PlacePatchRecord patch);
+    
+    public Page<PlaceRecord> listAll(Pageable pageable);
 
 }
