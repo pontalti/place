@@ -1,7 +1,10 @@
 package com.demo.place;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -13,6 +16,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,18 +31,12 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.util.StreamUtils;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ObjectNode;
-
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 @SpringBootTest(webEnvironment = WebEnvironment.MOCK, classes = PlaceApplication.class)
 @AutoConfigureMockMvc
@@ -76,8 +76,8 @@ public class PlaceTests {
     @Test
     @DisplayName("Test deleteById endpoint")
     public void deleteById() throws Exception {
-        this.mockMvc.perform(delete(BASE+"/2"))
-                .andExpect(status().isOk());
+        this.mockMvc.perform(delete(BASE + "/2"))
+                	.andExpect(status().isNoContent());
     }
 
     @ParameterizedTest
@@ -161,11 +161,11 @@ public class PlaceTests {
         var openingHours = json.get("openingHours");
 
         for (JsonNode group : openingHours) {
-            assertThat(group.get("day").isString()).isTrue();
+            assertTrue(group.get("day").isString(), "`day` deve ser texto");
 
             var hours = group.get("intervals");
-            assertThat(hours).isNotNull();
-            assertThat(hours.isArray() || hours.isString()).isTrue();
+            assertNotNull(hours, "`intervals` não pode ser nulo");
+            assertTrue(hours.isArray() || hours.isString(), "`intervals` deve ser array ou texto");
         }
     }
 
@@ -272,21 +272,26 @@ public class PlaceTests {
                 .param("page", "0")
                 .param("size", "50")
                 .param("sort", "label,asc"));
-
+ 
         var descending = pageContent(get(BASE)
                 .param("page", "0")
                 .param("size", "50")
                 .param("sort", "label,desc"));
-
-        // Skipped when the fixture has a single row: with one element both
-        // directions look identical and the assertion would prove nothing.
-        if (ascending.size() < 2) {
+ 
+        var labelsAsc = labelsOf(ascending);
+ 
+        // Nothing to prove with a single row: both directions look identical,
+        // so the assertions below would pass on an unsorted implementation too.
+        if (labelsAsc.size() < 2) {
             return;
         }
-
-        var labelsAsc = labelsOf(ascending);
-        assertThat(labelsAsc).isSorted();
-        assertThat(labelsOf(descending)).containsExactlyElementsOf(labelsAsc.reversed());
+ 
+        var expectedAsc = new ArrayList<>(labelsAsc);
+        expectedAsc.sort(Comparator.naturalOrder());
+        assertEquals(expectedAsc, labelsAsc, "the page should come back sorted by label");
+ 
+        assertEquals(labelsAsc.reversed(), labelsOf(descending),
+                "desc should return the same labels in the opposite order");
     }
 
     @Test
@@ -310,8 +315,8 @@ public class PlaceTests {
         "days" here means the mapping ran outside the transaction.
         */
         for (JsonNode place : content) {
-            assertThat(place.get("days")).isNotNull();
-            assertThat(place.get("days").isArray()).isTrue();
+        	assertNotNull(place.get("days"));
+        	assertTrue(place.get("days").isArray());
         }
     }
 

@@ -179,16 +179,16 @@ public class PlaceController {
             summary = "Delete place by ID",
             parameters = @Parameter(name = "id", description = "Place ID", example = "1", required = true),
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Place deleted successfully"),
-                    @ApiResponse(responseCode = "404", description = "Place not found")
+                    @ApiResponse(responseCode = "204", description = "Place deleted successfully",
+                            content = @Content),
+                    @ApiResponse(responseCode = "404", description = "Place not found",
+                            content = @Content)
             }
     )
-    @DeleteMapping(version = API_VERSION, path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> deleteById(
-            @PathVariable("id") @NotNull Long id
-    ) {
+    @DeleteMapping(path = "/{id}", version = API_VERSION)
+    public ResponseEntity<Void> deleteById(@PathVariable("id") @NotNull Long id) {
         this.placeService.deleteById(id);
-        return ResponseEntity.ok("Place deleted successfully");
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(
