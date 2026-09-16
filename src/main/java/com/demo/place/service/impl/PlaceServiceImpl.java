@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import com.demo.place.annotation.Log;
 import com.demo.place.entity.Place;
 import com.demo.place.mapper.PlaceMapper;
+import com.demo.place.records.PageRequest;
+import com.demo.place.records.PageResponse;
 import com.demo.place.records.PlacePatchRecord;
 import com.demo.place.records.PlaceRecord;
 import com.demo.place.repository.PlaceRepository;
@@ -177,5 +179,29 @@ public class PlaceServiceImpl implements PlaceService {
         }
 
         return mapper.toRecord(place);
+    }
+    
+    /**
+     * Pages over the places.
+     *
+     * <p>Two round trips instead of one: the first pages the ids, the second
+     * loads that page with its opening hours. See PlaceRepository#findPageOfIds
+     * for why a single query with the fetch graph cannot page correctly.
+     */
+    @Log
+    @Override
+    public PageResponse<PlaceRecord> listAll(PageRequest page) {
+        long total = this.repository.countAll();
+ 
+        List<Long> ids = this.repository.findPageOfIds(page);
+        if (ids.isEmpty()) {
+            return PageResponse.empty(page.number(), page.size(), total);
+        }
+ 
+        List<PlaceRecord> content = this.repository.findAllByIdIn(ids, page).stream()
+                .map(this.mapper::toRecord)
+                .toList();
+ 
+        return PageResponse.of(content, page.number(), page.size(), total);
     }
 }

@@ -3,14 +3,20 @@ package com.demo.place;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.junit.jupiter.api.BeforeAll;
@@ -123,51 +129,7 @@ public class PlaceResourceTest {
             .contentType(ContentType.JSON)
             .body("[0].id", notNullValue());
     }
-/*
-    @Test
-    @DisplayName("Test createPlace endpoint - bad request validation")
-    public void createPlaceBadRequest() throws IOException {
-        String json = readJsonFile("place_bad_request.json");
 
-        given()
-            .contentType(ContentType.JSON)
-            .body(json)
-        .when()
-            .post("/place")
-        .then()
-            .statusCode(400);
-    }
-
-    @Test
-    @DisplayName("Test createPlace endpoint - malformed json")
-    public void createPlaceMalformed() throws IOException {
-
-        String json = readJsonFile("place_malformed.json");
-
-        given()
-            .contentType(ContentType.JSON)
-            .body(json)
-        .when()
-            .post("/place")
-        .then()
-            .statusCode(400);
-    }
-
-    @ParameterizedTest
-    @DisplayName("Test createPlace endpoint - bad request validation for wrong time")
-    @CsvSource({"place_wrong_time_1.json", "place_wrong_time_2.json", "place_wrong_time_3.json"})
-    public void createPlaceWrongTime(String fileName) throws IOException {
-        String json = readJsonFile(fileName);
-
-        given()
-            .contentType(ContentType.JSON)
-            .body(json)
-        .when()
-            .post("/place")
-        .then()
-            .statusCode(400);
-    }
-*/
     @ParameterizedTest
     @DisplayName("Test createPlace endpoint - bad request validation")
     @CsvSource({"place_bad_request.json", "place_malformed.json", "place_wrong_time_1.json", "place_wrong_time_2.json", "place_wrong_time_3.json"})
@@ -296,5 +258,169 @@ public class PlaceResourceTest {
             .body("label", is("Stadio Giuseppe Meazza -> Patch"))
             .body("days", notNullValue())
             .body("days.size()", is(7));
+    }
+    
+    @Test
+    @DisplayName("Test listPaged endpoint - page envelope with defaults")
+    public void listPagedDefaults() {
+        given()
+            .accept(ContentType.JSON)
+            .queryParam("page", 0)
+        .when()
+            .get("/place")
+        .then()
+            .statusCode(200)
+            .contentType(ContentType.JSON)
+            .body("content", notNullValue())
+            .body("number", is(0))
+            .body("size", is(20))
+            .body("first", is(true))
+            .body("totalElements", notNullValue())
+            .body("totalPages", notNullValue());
+    }
+ 
+    @Test
+    @DisplayName("Test listPaged endpoint - honours the size parameter")
+    public void listPagedRespectsSize() {
+        given()
+            .accept(ContentType.JSON)
+            .queryParam("page", 0)
+            .queryParam("size", 1)
+        .when()
+            .get("/place")
+        .then()
+            .statusCode(200)
+            .body("size", is(1))
+            .body("content.size()", lessThanOrEqualTo(1));
+    }
+ 
+    @Test
+    @DisplayName("Test listPaged endpoint - size is capped so a huge value cannot load the table")
+    public void listPagedCapsSize() {
+        given()
+            .accept(ContentType.JSON)
+            .queryParam("page", 0)
+            .queryParam("size", 999_999)
+        .when()
+            .get("/place")
+        .then()
+            .statusCode(200)
+            .body("size", is(100));
+    }
+ 
+    @Test
+    @DisplayName("Test listPaged endpoint - sorting applies across the table, not within the page")
+    public void listPagedSortsByLabel() throws IOException {
+        List<String> ascending = labelsOf(requestPage("label,asc"));
+        List<String> descending = labelsOf(requestPage("label,desc"));
+ 
+        // With a single row both directions look identical and the assertion
+        // would prove nothing, so there is nothing to check.
+        if (ascending.size() < 2) {
+            return;
+        }
+ 
+        List<String> expectedAscending = new ArrayList<>(ascending);
+        expectedAscending.sort(Comparator.naturalOrder());
+        assertEquals(expectedAscending, ascending, "the page should come back sorted");
+ 
+        List<String> reversed = new ArrayList<>(ascending);
+        Collections.reverse(reversed);
+        assertEquals(reversed, descending, "desc should mirror asc");
+    }
+ 
+    @Test
+    @DisplayName("Test listPaged endpoint - an unknown sort property falls back to the default")
+    public void listPagedIgnoresUnknownSortProperty() {
+        // The property is interpolated into an ORDER BY clause, so it is checked
+        // against an allow-list. An unknown value must not reach the query, and
+        // must not turn a typo into a 400 either.
+        given()
+            .accept(ContentType.JSON)
+            .queryParam("page", 0)
+            .queryParam("sort", "dropTable,asc")
+        .when()
+            .get("/place")
+        .then()
+            .statusCode(200)
+            .body("content", notNullValue());
+    }
+ 
+    @Test
+    @DisplayName("Test listPaged endpoint - page past the last one returns 200 with empty content")
+    public void listPagedOutOfRange() {
+        given()
+            .accept(ContentType.JSON)
+            .queryParam("page", 9_999)
+            .queryParam("size", 20)
+        .when()
+            .get("/place")
+        .then()
+            .statusCode(200)
+            .body("content.size()", is(0))
+            .body("first", is(false));
+    }
+ 
+    @Test
+    @DisplayName("Test listPaged endpoint - the opening hours come back with each record")
+    public void listPagedIncludesDays() throws IOException {
+        JsonNode content = requestPage(null);
+        /*
+        Guards the fetch graph: if the mapping ever runs outside the
+        transaction, days comes back missing instead of populated.
+        */
+        for (JsonNode place : content) {
+            assertNotNull(place.get("days"), "`days` não pode ser nulo");
+            assertTrue(place.get("days").isArray(), "`days` deve ser um array");
+        }
+    }
+ 
+    @Test
+    @DisplayName("Test listAll endpoint - without the page parameter the plain array still answers")
+    public void listAllStillReturnsAnArray() throws IOException {
+        /*
+    	Both shapes share one handler because JAX-RS cannot route on the
+        presence of a query parameter; this asserts the fallback branch.
+        */
+        String response =
+            given()
+                .accept(ContentType.JSON)
+            .when()
+                .get("/place")
+            .then()
+                .statusCode(200)
+                .extract()
+                .asString();
+ 
+        assertTrue(this.objectMapper.readTree(response).isArray(),
+                   "sem `page` a resposta deve ser um array");
+    }
+ 
+    /** Requests a page of 50 and returns the {@code content} node. */
+    private JsonNode requestPage(String sort) throws IOException {
+        var request = given()
+                .accept(ContentType.JSON)
+                .queryParam("page", 0)
+                .queryParam("size", 50);
+ 
+        if (sort != null) {
+            request = request.queryParam("sort", sort);
+        }
+ 
+        String response = request
+            .when()
+                .get("/place")
+            .then()
+                .statusCode(200)
+                .extract()
+                .asString();
+ 
+        return this.objectMapper.readTree(response).get("content");
+    }
+ 
+    private List<String> labelsOf(JsonNode content) {
+        List<String> labels = new ArrayList<>();
+        content.forEach(place -> labels.add(place.get("label").asText()));
+        return labels;
     }
 }

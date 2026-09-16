@@ -11,6 +11,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 
 import com.demo.place.records.GroupedPlaceRecord;
+import com.demo.place.records.PageRequest;
 import com.demo.place.records.PlacePatchRecord;
 import com.demo.place.records.PlaceRecord;
 import com.demo.place.service.GroupPlaceService;
@@ -30,6 +31,7 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -83,16 +85,6 @@ public class PlaceResource {
 	    return Response.status(Response.Status.CREATED).entity(savedPlaces).build();
 	}
 
-	@GET
-	@Path("")
-	@Produces(MediaType.APPLICATION_JSON)
-	@Operation(summary = "Lista todos os lugares", description = "Retorna a lista de lugares cadastrados")
-	@APIResponse(responseCode = "200", description = "Lista de lugares", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PlaceRecord.class)))
-	public Response fetchAll() {
-		List<PlaceRecord> places = placeService.listAll();
-		return Response.ok(places).build();
-	}
-	
 	@GET
 	@Path("/{id}")
 	@Operation(summary = "Fetch a Place by ID", description = "Returns a place details")
@@ -157,5 +149,56 @@ public class PlaceResource {
 			@Parameter(name = "id", description = "Place ID", example = "1", required = true) @PathParam("id") Long id) {
 		this.placeService.deleteById(id);
 		return Response.noContent().build();
+	}
+	
+	@GET
+	@Path("")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Operation(
+	        summary = "List places, optionally paginated",
+	        description = """
+	                Returns every place with its opening hours.
+
+	                **Two shapes, one path:**
+	                • Without the `page` query parameter the response is a plain array,
+	                  which is the original contract.
+	                • With `page` present the response is a page envelope: the records sit
+	                  under `content`, next to `totalElements`, `totalPages`, `number`,
+	                  `size`, `first` and `last`.
+
+	                JAX-RS dispatches on path, method and media type only — it cannot route
+	                on the presence of a query parameter the way Spring MVC does — so both
+	                shapes are served by this single handler.
+
+	                **Query Parameters:**
+	                1. `page` — zero-based page index; its presence is what switches the shape.
+	                2. `size` — records per page; defaults to `20`, capped at `100`.
+	                3. `sort` — `property,(asc|desc)`; defaults to `label,asc`. Only `id`,
+	                   `label` and `location` are accepted; anything else falls back to the
+	                   default instead of failing.
+
+	                A page index past the last one returns `200` with an empty `content`
+	                array, not `404`.
+	                """)
+	@APIResponses({
+	        @APIResponse(responseCode = "200",
+	                description = "Array of places, or a page envelope when `page` is supplied",
+	                content = @Content(mediaType = MediaType.APPLICATION_JSON,
+	                        schema = @Schema(implementation = PlaceRecord[].class)))
+	})
+	public Response listAll(
+	        @Parameter(description = "Zero-based page index; switches the response to a page envelope")
+	        @QueryParam("page") Integer page,
+
+	        @Parameter(description = "Records per page (default 20, max 100)")
+	        @QueryParam("size") Integer size,
+
+	        @Parameter(description = "Sort criteria: property,(asc|desc)")
+	        @QueryParam("sort") String sort) {
+
+	    if (page == null) {
+	        return Response.ok(this.placeService.listAll()).build();
+	    }
+	    return Response.ok(this.placeService.listAll(PageRequest.of(page, size, sort))).build();
 	}
 }
