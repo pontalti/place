@@ -2,25 +2,25 @@ package com.demo.place.service.impl;
 
 import java.time.DayOfWeek;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.demo.place.annotation.Log;
-import com.demo.place.records.DayIntervalRecord;
+import com.demo.place.entity.DayOpening;
+import com.demo.place.entity.Place;
 import com.demo.place.records.GroupedOpeningDayRecord;
 import com.demo.place.records.GroupedPlaceRecord;
-import com.demo.place.repository.PlaceRepository;
+import com.demo.place.repository.PlaceReadOnlyRepository;
 import com.demo.place.service.GroupPlaceService;
 
 import lombok.RequiredArgsConstructor;
@@ -30,62 +30,87 @@ import lombok.RequiredArgsConstructor;
 @Scope(scopeName = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class GroupPlaceServiceImpl implements GroupPlaceService {
 
-	private final List<DayOfWeek> dayOrder;
-	private final PlaceRepository repository;
+    private static final String CLOSED = "closed";
 
-	@Log
-	@Override
-	public GroupedPlaceRecord getGroupedOpeningHoursByPlaceId(Long id) {
-		var place = this.repository.findById(id)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Place not found: " + id));
+    private static final Comparator<DayOpening> BY_DAY_THEN_START =
+            Comparator.comparing(DayOpening::getDayOfWeek).thenComparing(DayOpening::getStartTime);
 
-		var openings = this.repository.findGroupedOpeningsByPlaceId(id);
+    private final List<DayOfWeek> dayOrder;
+    private final PlaceReadOnlyRepository placeReadOnlyRepository;
 
-		Map<DayOfWeek, List<String>> byDay = buildMapByDay(openings);
+    @Log
+    @Override
+    @Transactional(readOnly = true)
+    public GroupedPlaceRecord getGroupedOpeningHoursByPlaceId(Long id) {
+        var place = this.placeReadOnlyRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Place not found: " + id));
+        /*
+         * The entity graph already brought the days along with the place, so
+         * the dedicated interval query this method used to run was a second
+         * round trip for data that was sitting right here.
+         */
+        var byDay = buildMapByDay(place);
 
-		LinkedHashMap<String, List<DayOfWeek>> groupedDays = new LinkedHashMap<>();
-		Map<String, List<String>> intervalMap = new HashMap<>();
-		
-		this.dayOrder.forEach(day->{
-			List<String> intervals = byDay.getOrDefault(day, Collections.emptyList());
-			if (intervals.isEmpty()) {
-				intervals = List.of("closed");
-			}
+        Map<List<String>, List<DayOfWeek>> groups = new LinkedHashMap<>();
+        this.dayOrder.forEach(day -> {
+            var intervals = byDay.getOrDefault(day, List.of());
+            var key = intervals.isEmpty() ? List.of(CLOSED) : intervals;
+            groups.computeIfAbsent(key, ignored -> new ArrayList<>()).add(day);
+        });
 
-			var key = String.join(", ", intervals);
-			groupedDays.computeIfAbsent(key, ignoredKey -> new ArrayList<>()).add(day);
-			intervalMap.putIfAbsent(key, intervals);			
-		});
+        return new GroupedPlaceRecord(
+                place.getId(),
+                place.getLabel(),
+                place.getLocation(),
+                buildOpeningGroups(groups));
+    }
 
-		var openingGroups = buildOpeningGroups(groupedDays, intervalMap);
+    /**
+     * Groups the intervals of a place by day of the week.
+     *
+     * <p>Sorting happens here instead of in an ORDER BY because the collection
+     * is already in memory — a handful of rows per place.
+     */
+    private Map<DayOfWeek, List<String>> buildMapByDay(Place place) {
+        Map<DayOfWeek, List<String>> byDay = new EnumMap<>(DayOfWeek.class);
+        this.dayOrder.forEach(day -> byDay.put(day, new ArrayList<>()));
 
-		return new GroupedPlaceRecord(place.getId(), place.getLabel(), place.getLocation(), openingGroups);
-	}
+        place.getDays().stream()
+                .sorted(BY_DAY_THEN_START)
+                .forEach(day -> byDay
+                        .computeIfAbsent(day.getDayOfWeek(), ignored -> new ArrayList<>())
+                        .add(day.getStartTime() + " - " + day.getEndTime()));
 
-	private Map<DayOfWeek, List<String>> buildMapByDay(List<DayIntervalRecord> openings) {
-		Map<DayOfWeek, List<String>> byDay = new HashMap<>();
-		this.dayOrder.forEach(day->byDay.put(day, new ArrayList<>()));
-		openings.forEach(record->  byDay.get(record.day()).add(record.startTime() + " - " + record.endTime()));
-		return byDay;
-	}
-	
-	private List<GroupedOpeningDayRecord> buildOpeningGroups(LinkedHashMap<String, List<DayOfWeek>> groupedDays,
-			Map<String, List<String>> intervalMap) {
-		return groupedDays.entrySet().stream()
-				.sorted(Comparator.comparing(e -> this.dayOrder.indexOf(e.getValue().getFirst())))
-				.map(e -> new GroupedOpeningDayRecord(formatDays(e.getValue()), intervalMap.get(e.getKey())))
-				.collect(Collectors.toList());
-	}
+        return byDay;
+    }
 
-	protected String formatDay(DayOfWeek day) {
-		var name = day.name().toLowerCase();
-		return Character.toUpperCase(name.charAt(0)) + name.substring(1);
-	}
+    /**
+     * Uses the interval list itself as the grouping key.
+     *
+     * <p>The previous version joined the intervals into a single string and
+     * kept a second map to get the list back. List equality is by value, so one
+     * map is enough — and a comma inside an interval can no longer make two
+     * different schedules collide.
+     */
+    private List<GroupedOpeningDayRecord> buildOpeningGroups(Map<List<String>, List<DayOfWeek>> groups) {
+        return groups.entrySet().stream()
+                .sorted(Comparator.comparingInt(
+                        entry -> this.dayOrder.indexOf(entry.getValue().getFirst())))
+                .map(entry -> new GroupedOpeningDayRecord(
+                        formatDays(entry.getValue()), entry.getKey()))
+                .toList();
+    }
 
-	protected String formatDays(List<DayOfWeek> days) {
-		if (days.size() == 1) {
-			return formatDay(days.getFirst());
-		}
-		return formatDay(days.getFirst()) + " - " + formatDay(days.getLast());
-	}
+    protected String formatDay(DayOfWeek day) {
+        var name = day.name().toLowerCase();
+        return Character.toUpperCase(name.charAt(0)) + name.substring(1);
+    }
+
+    protected String formatDays(List<DayOfWeek> days) {
+        if (days.size() == 1) {
+            return formatDay(days.getFirst());
+        }
+        return formatDay(days.getFirst()) + " - " + formatDay(days.getLast());
+    }
 }
