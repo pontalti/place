@@ -22,7 +22,7 @@ extra["mapstructVersion"] = "1.6.3"
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(25))
+        languageVersion.set(JavaLanguageVersion.of(27))
     }
 }
 
@@ -37,16 +37,21 @@ dependencies {
     
     runtimeOnly("com.h2database:h2")
 
-    // Lombok (optional)
-    compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok")
-    testCompileOnly("org.projectlombok:lombok")
-    testAnnotationProcessor("org.projectlombok:lombok")
-
-    // MapStruct processors
-    implementation("org.mapstruct:mapstruct:${property("mapstructVersion")}")
-    annotationProcessor("org.mapstruct:mapstruct-processor:${property("mapstructVersion")}")
-    testAnnotationProcessor("org.mapstruct:mapstruct-processor:${property("mapstructVersion")}")
+	// Lombok
+	compileOnly("org.projectlombok:lombok:1.18.48")
+	annotationProcessor("org.projectlombok:lombok:1.18.48")
+	
+	testCompileOnly("org.projectlombok:lombok:1.18.48")
+	testAnnotationProcessor("org.projectlombok:lombok:1.18.48")
+	
+	// MapStruct
+	implementation("org.mapstruct:mapstruct:1.6.3")
+	annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
+	testAnnotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
+	
+	// Lombok + MapStruct integration
+	annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+	testAnnotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
 
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
