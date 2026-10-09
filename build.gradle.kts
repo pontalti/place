@@ -6,7 +6,7 @@ plugins {
     // IDE integrations
     id("idea")
     id("eclipse")
-    id ("com.diffplug.eclipse.apt") version "4.3.0"
+    id ("com.diffplug.eclipse.apt") version "4.4.1"
 }
 
 group = "com.demo.place"
@@ -24,6 +24,8 @@ java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(27))
     }
+    sourceCompatibility = JavaVersion.VERSION_27
+    targetCompatibility = JavaVersion.VERSION_27
 }
 
 dependencies {

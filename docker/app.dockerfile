@@ -1,4 +1,4 @@
-FROM gradle:jdk25-alpine AS build
+FROM gradle:jdk27-alpine AS build
 USER gradle
 WORKDIR /home/app
 COPY --chown=gradle:gradle build.gradle* settings.gradle* gradlew /home/app/
@@ -8,7 +8,7 @@ COPY --chown=gradle:gradle src /home/app/src
 COPY --chown=gradle:gradle src /home/app/src
 RUN ./gradlew clean build --refresh-dependencies --no-daemon
 
-FROM eclipse-temurin:25-jre-alpine
+FROM eclipse-temurin:27-jre-alpine
 LABEL Gustavo Pontalti
 ENV JAVA_TOOL_OPTIONS -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8000
 WORKDIR /app
