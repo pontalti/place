@@ -1,24 +1,39 @@
-FROM gradle:jdk25-alpine AS build
+
+# ==========================================
+# Build Stage - JDK 27 + Gradle Wrapper
+# ==========================================
+FROM eclipse-temurin:27-jdk-alpine AS build
 
 WORKDIR /home/app
 
+# Gradle configuration
 COPY gradlew .
 COPY gradle ./gradle
-COPY settings.gradle.kts gradle.properties build.gradle.kts  ./
+COPY settings.gradle.kts gradle.properties build.gradle.kts ./
 
 RUN chmod +x ./gradlew
 
+# Application source
 COPY src ./src
 
-RUN ./gradlew clean build --no-daemon
+# Build Quarkus application
+RUN ./gradlew clean build \
+    --no-daemon \
+    --no-configuration-cache
 
 
-FROM eclipse-temurin:25-jre-alpine
+# ==========================================
+# Runtime Stage - JRE 27
+# ==========================================
+FROM eclipse-temurin:27-jre-alpine
 
 WORKDIR /app
 
+# Copy Quarkus fast-jar distribution
 COPY --from=build /home/app/build/quarkus-app/ ./
 
-EXPOSE 8080 8000
+# Application port
+EXPOSE 8080
 
-CMD ["java", "-jar", "quarkus-run.jar"]
+# Run Quarkus
+ENTRYPOINT ["java", "-jar", "quarkus-run.jar"]

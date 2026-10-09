@@ -105,29 +105,29 @@ The application loads initial data into an H2 in-memory database and exposes the
 ### 🏠 Home Endpoint
 
 ```bash
-curl http://localhost:8080/
+curl http://localhost:8080/api/v1/
 ```
 
 ### 📍 Places
 
-Base path dos recursos: `/place`.
+Base path dos recursos: `/api/v1/place`.
 
 #### Get all places
 
 ```bash
-curl http://localhost:8080/place
+curl http://localhost:8080/api/v1/place
 ```
 
 #### Get place by ID
 
 ```bash
-curl http://localhost:8080/place/1
+curl http://localhost:8080/api/v1/place/1
 ```
 
 #### Get grouped opening hours by place ID
 
 ```bash
-curl http://localhost:8080/place/1/opening-hours/grouped
+curl http://localhost:8080/api/v1/place/1/opening-hours/grouped
 ```
 
 #### Create one or multiple places
@@ -135,25 +135,25 @@ curl http://localhost:8080/place/1/opening-hours/grouped
 O endpoint aceita um array de objetos Place.
 
 ```bash
-curl -X POST http://localhost:8080/place   -H "Content-Type: application/json"   -d @/path/to/postman/place.json
+curl -X POST http://localhost:8080/api/v1/place   -H "Content-Type: application/json"   -d @/path/to/postman/place.json
 ```
 
 #### Delete a place by ID
 
 ```bash
-curl -X DELETE http://localhost:8080/place/{id}
+curl -X DELETE http://localhost:8080/api/v1/place/{id}
 ```
 
 #### Update a place (full update)
 
 ```bash
-curl -X PUT http://localhost:8080/place   -H "Content-Type: application/json"   -d @/path/to/postman/place_update.json
+curl -X PUT http://localhost:8080/api/v1/place   -H "Content-Type: application/json"   -d @/path/to/postman/place_update.json
 ```
 
 #### Partial update (PATCH)
 
 ```bash
-curl -X PATCH http://localhost:8080/place   -H "Content-Type: application/json"   -d @/path/to/postman/place_partial_update.json
+curl -X PATCH http://localhost:8080/api/v1/place   -H "Content-Type: application/json"   -d @/path/to/postman/place_partial_update.json
 ```
 
 ---

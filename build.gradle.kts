@@ -3,7 +3,7 @@ plugins {
     id("io.quarkus")
     id("idea")
     id("eclipse")
-    id ("com.diffplug.eclipse.apt") version "4.3.0"
+    id ("com.diffplug.eclipse.apt") version "4.4.1"
 }
 
 group = "com.demo.place"
@@ -15,16 +15,15 @@ repositories {
     mavenLocal()
 }
 
-val quarkusPlatformGroupId: String by project
-val quarkusPlatformArtifactId: String by project
-val quarkusPlatformVersion: String by project
-val mapstructVersion: String by project
-val lombokVersion: String by project
+val quarkusPlatformGroupId = providers.gradleProperty("quarkusPlatformGroupId").get()
+val quarkusPlatformArtifactId = providers.gradleProperty("quarkusPlatformArtifactId").get()
+val quarkusPlatformVersion = providers.gradleProperty("quarkusPlatformVersion").get()
+val mapstructVersion = providers.gradleProperty("mapstructVersion").get()
+val lombokVersion = providers.gradleProperty("lombokVersion").get()
 
 dependencies {
     implementation(enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}"))
     implementation("io.quarkus:quarkus-arc")
-    implementation("io.quarkus:quarkus-rest")
 	implementation("io.quarkus:quarkus-rest")
     implementation("io.quarkus:quarkus-rest-jackson")
     implementation("io.quarkus:quarkus-config-yaml")
@@ -45,27 +44,30 @@ dependencies {
 
     implementation("io.quarkus:quarkus-smallrye-openapi")
 	
-	compileOnly("org.projectlombok:lombok:${property("lombokVersion")}")
-    annotationProcessor("org.projectlombok:lombok:${property("lombokVersion")}")
-    testCompileOnly("org.projectlombok:lombok:${property("lombokVersion")}")
-    testAnnotationProcessor("org.projectlombok:lombok:${property("lombokVersion")}")
+	compileOnly("org.projectlombok:lombok:${lombokVersion}")
+    annotationProcessor("org.projectlombok:lombok:${lombokVersion}")
+    testCompileOnly("org.projectlombok:lombok:${lombokVersion}")
+    testAnnotationProcessor("org.projectlombok:lombok:${lombokVersion}")
 
-    implementation("org.mapstruct:mapstruct:${property("mapstructVersion")}")
-    annotationProcessor("org.mapstruct:mapstruct-processor:${property("mapstructVersion")}")
-    testAnnotationProcessor("org.mapstruct:mapstruct-processor:${property("mapstructVersion")}")
+    implementation("org.mapstruct:mapstruct:${mapstructVersion}")
+    annotationProcessor("org.mapstruct:mapstruct-processor:${mapstructVersion}")
+    testAnnotationProcessor("org.mapstruct:mapstruct-processor:${mapstructVersion}")
+    
+    annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+	testAnnotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
 
     testImplementation("io.quarkus:quarkus-junit5")
     testImplementation("io.rest-assured:rest-assured")
 	testImplementation("org.assertj:assertj-core:3.27.6")
-	testImplementation(enforcedPlatform("${property("quarkusPlatformGroupId")}:${property("quarkusPlatformArtifactId")}:${property("quarkusPlatformVersion")}"))
+	testImplementation(enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}"))
 }
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(25))
+        languageVersion.set(JavaLanguageVersion.of(27))
     }
-    sourceCompatibility = JavaVersion.VERSION_25
-    targetCompatibility = JavaVersion.VERSION_25
+    sourceCompatibility = JavaVersion.VERSION_27
+    targetCompatibility = JavaVersion.VERSION_27
 }
 
 tasks.jar {
